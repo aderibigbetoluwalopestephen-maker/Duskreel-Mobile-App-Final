@@ -1,0 +1,40 @@
+name: Duskreel mobile tool modes
+
+on:
+  push:
+    paths:
+      - '.github/workflows/mobile-tool-modes.yml'
+  workflow_dispatch:
+
+concurrency:
+  group: duskreel-mobile-tool-modes-${{ github.ref }}
+  cancel-in-progress: true
+
+permissions:
+  contents: write
+
+jobs:
+  patch:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - name: Add selection-based mobile tool panels
+        run: |
+          python3 - <<'PY'
+          from pathlib import Path
+          p=Path('index.html')
+          s=p.read_text(encoding='utf-8')
+          marker='duskreel-mobile-tool-modes-v1'
+          if marker not in s:
+            css=r'''\n<style id="duskreel-mobile-tool-modes-v1">\n@media(max-width:760px){\n  /* Keep the editing area clean: tool panels are opened only by the bottom toolbar. */\n  .panel.lightroom-panel > .block.mobile-tool-hidden{display:none!important;}\n  #mobileEditTools button[data-mobile-tool]{transition:transform .12s ease,background .12s ease;}\n  #mobileEditTools button[data-mobile-tool].active{transform:translateY(-2px);}\n  #mobileToolEmptyState{display:flex;align-items:center;justify-content:center;min-height:110px;color:#9f9aa3;text-align:center;font-size:12px;padding:24px;}\n}\n</style>\n'''
+            s=s.replace('</head>',css+'\n</head>',1)
+            js=r'''\n<script id="duskreel-mobile-tool-modes-v1">\n(function(){\n  const TOOL_SELECTORS={\n    adjust:['#expSlider'],\n    filters:['#fxGrid'],\n    effects:['#effectGrid','#effectsGrid','#fxGrid'],\n    crop:['#cropTools'],\n    retouch:['#spotToggle'],\n    ai:['#autoEditBtn'],\n    watermark:['#watermarkBtn','#watermarkInput']\n  };\n  function panel(){return document.querySelector('.panel.lightroom-panel')||document.querySelector('.panel');}\n  function blockFor(selector){\n    const el=document.querySelector(selector);\n    if(!el) return null;\n    return el.closest('.block')||el;\n  }\n  function allBlocks(){\n    const p=panel();\n    return p ? Array.from(p.querySelectorAll('.block')) : [];\n  }\n  function getTarget(name){\n    const sels=TOOL_SELECTORS[name]||[];\n    for(const sel of sels){const b=blockFor(sel);if(b)return b;}\n    return null;\n  }\n  function hideAll(){\n    allBlocks().forEach(b=>b.classList.add('mobile-tool-hidden'));\n    document.getElementById('mobileToolEmptyState')?.remove();\n  }\n  function showTool(name){\n    const p=panel();\n    if(!p)return;\n    hideAll();\n    const target=getTarget(name);\n    if(target){\n      target.classList.remove('mobile-tool-hidden');\n      requestAnimationFrame(()=>p.scrollTo({top:Math.max(0,target.offsetTop-10),behavior:'smooth'}));\n    }else{\n      const empty=document.createElement('div');\n      empty.id='mobileToolEmptyState';\n      empty.innerHTML='<div>This tool is not available in this editor version yet.</div>';\n      p.prepend(empty);\n    }\n  }\n  function init(){\n    const tools=document.getElementById('mobileEditTools');\n    if(!tools)return;\n    hideAll();\n    tools.querySelectorAll('button[data-mobile-tool]').forEach(btn=>{\n      btn.addEventListener('click',function(){\n        const name=this.dataset.mobileTool;\n        tools.querySelectorAll('button[data-mobile-tool]').forEach(b=>b.classList.toggle('active',b===this));\n        if(name==='more'){\n          hideAll();\n          allBlocks().forEach(b=>b.classList.remove('mobile-tool-hidden'));\n          panel()?.scrollTo({top:0,behavior:'smooth'});\n        }else showTool(name);\n      });\n    });\n  }\n  if(document.readyState==='loading')document.addEventListener('DOMContentLoaded',init);else init();\n})();\n</script>\n'''
+            s=s.replace('</body>',js+'\n</body>',1)
+            p.write_text(s,encoding='utf-8')
+          PY
+          git config user.name 'github-actions[bot]'
+          git config user.email '41898282+github-actions[bot]@users.noreply.github.com'
+          git add index.html
+          git diff --cached --quiet && exit 0
+          git commit -m 'Make mobile editing panels open on tool selection'
+          git push
