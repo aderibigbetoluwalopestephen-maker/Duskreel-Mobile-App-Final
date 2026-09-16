@@ -32,8 +32,8 @@ jobs:
           s=p.read_text(encoding='utf-8')
           print('=== DUSKREEL FEATURE AUDIT ===')
           print('HTML bytes:', len(s))
-          print('script tags:', len(re.findall(r'<script\\b', s, re.I)))
-          print('style tags:', len(re.findall(r'<style\\b', s, re.I)))
+          print('script tags:', s.lower().count('<script'))
+          print('style tags:', s.lower().count('<style'))
 
           class Parser(HTMLParser):
               def __init__(self):
@@ -48,26 +48,17 @@ jobs:
           print('unique ids:', len(ids), 'duplicate ids:', sorted({x for x in q.ids if q.ids.count(x)>1}))
           print('buttons:', len(q.buttons), 'file inputs:', [(x.get('id'),x.get('accept'),x.get('multiple')) for x in q.inputs if x.get('type')=='file'])
 
-          # IDs used by JS selectors / getElementById.
-          refs=set(re.findall(r"(?:getElementById\\(['\"]([^'\"]+)|querySelector\\(['\"]#([^'\"]+))", s))
-          ref_ids={a or b for a,b in refs if (a or b)}
+          ref_ids=set(re.findall(r"getElementById\(['\"]([^'\"]+)", s))
+          ref_ids |= set(re.findall(r"querySelector(?:All)?\(['\"]#([^'\"]+)", s))
           missing=sorted(x for x in ref_ids if x not in ids)
           print('JS-referenced IDs:', len(ref_ids))
           print('MISSING JS IDs:', missing)
 
-          # Common direct element selectors.
-          selectors=sorted(set(re.findall(r"querySelector(?:All)?\\(['\"]([^'\"]+)['\"]", s)))
+          selectors=sorted(set(re.findall(r"querySelector(?:All)?\(['\"]([^'\"]+)['\"]", s)))
           for sel in selectors:
               if sel.startswith('#') and sel[1:] not in ids:
                   print('MISSING selector:', sel)
 
-          # Inline onclick / onchange references.
-          inline=[]
-          for m in re.finditer(r'on(click|change|input|load|submit)\\s*=\\s*["\']([^"\']+)', s, re.I):
-              inline.append((m.group(1),m.group(2)))
-          print('inline handlers:', len(inline))
-
-          # Feature markers and handlers.
           checks={
             'upload input': r'type=["\']file',
             'camera input': r'id=["\']cameraInput',
@@ -84,16 +75,15 @@ jobs:
             'before/after': r'before|compare',
             'queue/delete': r'queue|delete.*queue|remove.*queue',
             'logout': r'logout|log out',
-            'PWA service worker': r'serviceWorker|sw\\.js',
+            'PWA service worker': r'serviceWorker|sw\.js',
             'mobile toolbar': r'mobileEditTools|data-mobile-tool',
           }
           for name,pat in checks.items(): print(f'{name}:', bool(re.search(pat,s,re.I)))
 
-          # JS syntax sanity: extract scripts and report obvious unterminated blocks/strings only.
           scripts=re.findall(r'<script[^>]*>(.*?)</script>',s,re.I|re.S)
           print('inline script blocks:', len(scripts))
           for i,js in enumerate(scripts,1):
-              print(f'script {i}: chars={len(js)} braces={js.count("{")}/{js.count("}")} parens={js.count("(")}/{js.count(")")} brackets={js.count("[")}/{js.count("]")}')
+              print(f'script {i}: chars={len(js)} braces={js.count(chr(123))}/{js.count(chr(125))} parens={js.count(chr(40))}/{js.count(chr(41))} brackets={js.count(chr(91))}/{js.count(chr(93))}')
           PY
 
       - name: Browser smoke test with Playwright
@@ -123,7 +113,7 @@ jobs:
             console.log('mobile toolbar:', await page.locator('#mobileEditTools').isVisible().catch(()=>false));
             console.log('toolbar buttons:', await page.locator('#mobileEditTools button').count());
             console.log('download buttons:', await page.locator('#downloadOne').count());
-            console.log('logout candidates:', await page.locator('button,a,[role=button]').evaluateAll(es=>es.filter(e=>/log\\s*out/i.test(e.textContent||'')||e.id==='logoutBtn').map(e=>({id:e.id,text:(e.textContent||'').trim()}))));
+            console.log('logout candidates:', await page.locator('button,a,[role=button]').evaluateAll(es=>es.filter(e=>/log\s*out/i.test(e.textContent||'')||e.id==='logoutBtn').map(e=>({id:e.id,text:(e.textContent||'').trim()}))));
             console.log('page errors:', errors);
             await browser.close();
           })().catch(e=>{console.error(e);process.exit(1)});
