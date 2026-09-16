@@ -1,0 +1,132 @@
+name: Build Duskreel mobile app
+
+on:
+  push:
+    branches: [main]
+
+permissions:
+  contents: write
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Build the mobile version from the current Duskreel editor
+        shell: bash
+        run: |
+          python3 - <<'PY'
+          from pathlib import Path
+          from urllib.request import urlopen
+          import re
+
+          src_url = 'https://raw.githubusercontent.com/aderibigbetoluwalopestephen-maker/Duskreel--Photo-editor/main/index.html'
+          source = urlopen(src_url).read().decode('utf-8')
+
+          auth = '''<div id="authScreen">
+            <div class="auth-side left">
+              <div class="auth-slideshow">
+                <img src="https://picsum.photos/seed/duskreel-a/1200/1600" alt="">
+                <img src="https://picsum.photos/seed/duskreel-b/1200/1600" alt="">
+                <img src="https://picsum.photos/seed/duskreel-c/1200/1600" alt="">
+                <img src="https://picsum.photos/seed/duskreel-d/1200/1600" alt="">
+                <img src="https://picsum.photos/seed/duskreel-e/1200/1600" alt="">
+              </div>
+              <div class="scrim"></div><div class="grain"></div>
+              <div class="auth-hero">
+                <img class="mark-img-big" src="duskreel-logo.svg" alt="Duskreel">
+                <h1>Batch edit your shots without touching Lightroom.</h1>
+                <p>Drop a folder in, apply one look across every frame, and export clean images with powerful editing tools.</p>
+              </div>
+            </div>
+            <div class="auth-form-wrap">
+              <div class="auth-form">
+                <div class="mobile-auth-brand" aria-label="Duskreel">
+                  <img src="duskreel-logo.svg" alt="Duskreel logo">
+                  <div class="mobile-auth-name">Dusk<span>reel</span></div>
+                  <div class="mobile-auth-tagline">Edit • Enhance • Create</div>
+                </div>
+                <form id="nameForm">
+                  <div class="field"><label>Your name</label><input type="text" id="nameInput" placeholder="Your name" autocomplete="name" required></div>
+                  <div class="auth-error" id="nameError">Please enter your name to continue.</div>
+                  <button type="submit" class="auth-submit">Continue</button>
+                </form>
+              </div>
+            </div>
+          </div>
+
+          if '<div id="authScreen">' in source:
+              source = re.sub(r'<div id="authScreen">.*?(?=<div id="app" style="display:none;">)', auth + '\n', source, count=1, flags=re.S)
+          else:
+              raise SystemExit('auth screen was not found')
+
+          source = source.replace('duskreel-logo.png', 'duskreel-logo.svg')
+
+          css = r'''
+<style id="duskreel-mobile-app-update">
+.mark-img-big,.mark-img-big img,.brand .mark-img img{background:transparent!important;}
+.mobile-auth-brand{display:none;}
+@media (max-width:760px){
+  #authScreen{display:flex!important;align-items:center!important;justify-content:center!important;width:100%!important;min-height:100dvh!important;height:100dvh!important;overflow:auto!important;background:radial-gradient(circle at 50% 20%,rgba(255,190,30,.13),transparent 35%),#0a0809!important;}
+  #authScreen .auth-side{display:none!important;}
+  #authScreen .auth-form-wrap{width:100%!important;min-height:100dvh!important;height:100dvh!important;display:flex!important;align-items:center!important;justify-content:center!important;padding:18px!important;background:transparent!important;}
+  #authScreen .auth-form{width:min(100%,380px)!important;max-width:380px!important;margin:auto!important;padding:22px 20px 24px!important;border:1px solid rgba(255,215,90,.22)!important;border-radius:24px!important;background:rgba(20,16,13,.78)!important;box-shadow:0 24px 70px rgba(0,0,0,.55),inset 0 1px 0 rgba(255,255,255,.05)!important;backdrop-filter:blur(18px)!important;-webkit-backdrop-filter:blur(18px)!important;}
+  .mobile-auth-brand{display:flex!important;flex-direction:column!important;align-items:center!important;text-align:center!important;margin:0 0 22px!important;}
+  .mobile-auth-brand img{width:92px!important;height:92px!important;object-fit:contain!important;background:transparent!important;filter:drop-shadow(0 0 18px rgba(255,190,35,.38))!important;margin-bottom:10px!important;}
+  .mobile-auth-name{font-size:32px!important;line-height:1!important;font-weight:800!important;letter-spacing:-1px!important;color:#fff!important;}
+  .mobile-auth-name span{color:#ffc21c!important;}
+  .mobile-auth-tagline{margin-top:8px!important;color:#b9afb0!important;font-size:11px!important;letter-spacing:2px!important;}
+  #authScreen .auth-tabs{display:none!important;}
+  #authScreen .field{margin-bottom:16px!important;}
+  #authScreen .field label{color:#d8ccca!important;font-size:13px!important;margin-bottom:8px!important;}
+  #authScreen .field input{min-height:50px!important;padding:13px 15px!important;border-radius:12px!important;background:rgba(255,255,255,.045)!important;border:1px solid rgba(255,255,255,.14)!important;font-size:15px!important;}
+  #authScreen .auth-submit{min-height:52px!important;margin-top:6px!important;border-radius:12px!important;background:linear-gradient(135deg,#ffd84b,#f2a900)!important;color:#15100a!important;font-size:15px!important;box-shadow:0 10px 28px rgba(246,174,20,.25)!important;}
+  main{display:flex!important;flex-direction:column!important;height:auto!important;min-height:0!important;}
+  .clean-stage,.stage{position:sticky!important;top:58px!important;z-index:20!important;width:100%!important;height:38vh!important;min-height:250px!important;max-height:390px!important;padding:8px!important;overflow:hidden!important;background:#130A15!important;touch-action:none!important;}
+  #work,#beforeWork,.compare-pane canvas{max-width:92%!important;max-height:34vh!important;width:auto!important;height:auto!important;object-fit:contain!important;touch-action:none!important;pointer-events:none!important;}
+  .lightroom-panel,.panel,.right-panel,.adjustments-panel,.sidebar-right{position:relative!important;width:100%!important;max-width:none!important;height:auto!important;max-height:none!important;overflow:visible!important;order:2!important;}
+  .panel{padding-bottom:90px!important;}
+  .panel .block,.panel-block,.tool-section,.section{width:100%!important;box-sizing:border-box!important;}
+  .panel input[type=range]{width:100%!important;min-height:34px;}
+  .mobile-app-nav{position:fixed!important;bottom:0!important;left:0!important;right:0!important;z-index:100!important;}
+}
+@media (max-width:430px){
+  .clean-stage,.stage{top:54px!important;height:32vh!important;min-height:220px!important;max-height:300px!important;}
+  #work,#beforeWork,.compare-pane canvas{max-width:90%!important;max-height:28vh!important;}
+}
+</style>
+'''
+          source = source.replace('</head>', css + '\n</head>', 1)
+          Path('index.html').write_text(source, encoding='utf-8')
+          PY
+
+      - name: Create transparent Duskreel logo
+        run: |
+          cat > duskreel-logo.svg <<'SVG'
+          <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 512 512">
+            <defs>
+              <linearGradient id="g" x1="0" y1="0" x2="1" y2="1"><stop offset="0" stop-color="#fff6a0"/><stop offset=".38" stop-color="#ffd21a"/><stop offset="1" stop-color="#d88300"/></linearGradient>
+              <linearGradient id="lens" x1="0" y1="0" x2="1" y2="1"><stop offset="0" stop-color="#fff"/><stop offset=".25" stop-color="#777"/><stop offset=".55" stop-color="#17191c"/><stop offset="1" stop-color="#000"/></linearGradient>
+              <filter id="glow"><feGaussianBlur stdDeviation="7" result="b"/><feMerge><feMergeNode in="b"/><feMergeNode in="SourceGraphic"/></feMerge></filter>
+            </defs>
+            <path d="M72 190h210l58-62h77c28 0 51 23 51 51v105c-39-34-82-51-129-51-71 0-130 30-171 88H72c-29 0-52-23-52-52v-27c0-29 23-52 52-52z" fill="url(#g)" stroke="#ffdf45" stroke-width="8" filter="url(#glow)"/>
+            <path d="M78 216h184l-37 37H78c-15 0-27 12-27 27v12c0 15 12 27 27 27h74l-31 37H78c-36 0-65-29-65-65v-13c0-36 29-65 65-65z" fill="#090909" opacity=".9"/>
+            <rect x="89" y="252" width="76" height="24" rx="10" fill="url(#g)" stroke="#ffe36b" stroke-width="5"/>
+            <circle cx="346" cy="319" r="119" fill="#050505" stroke="url(#g)" stroke-width="16"/>
+            <circle cx="346" cy="319" r="82" fill="#101216" stroke="#25282d" stroke-width="12"/>
+            <circle cx="346" cy="319" r="58" fill="url(#lens)" stroke="#d7dbe0" stroke-width="5"/>
+            <ellipse cx="325" cy="295" rx="23" ry="13" fill="#fff" opacity=".9" transform="rotate(-25 325 295)"/>
+            <circle cx="366" cy="339" r="10" fill="#fff" opacity=".8"/>
+          </svg>
+          SVG
+
+      - name: Commit finished app and remove one-time workflow
+        run: |
+          git config user.name "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          rm -f .github/workflows/build-mobile-app.yml
+          git add index.html duskreel-logo.svg .github/workflows/build-mobile-app.yml
+          git commit -m "feat: build Duskreel mobile app UI"
+          git push
