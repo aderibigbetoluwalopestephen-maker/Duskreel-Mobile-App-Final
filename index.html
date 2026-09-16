@@ -4,6 +4,12 @@
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
 <title>Duskreel — photo editor</title>
+<link rel="manifest" href="./manifest.webmanifest">
+<meta name="theme-color" content="#080808">
+<meta name="mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+<meta name="apple-mobile-web-app-title" content="Duskreel">
 <link rel="icon" type="image/png" href="data:image/png;base64,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">
 <style>
   :root{
@@ -994,6 +1000,44 @@ main{grid-template-columns:214px minmax(0,1fr) 350px;background:#171719;}
   .mobile-install-banner{bottom:calc(72px + env(safe-area-inset-bottom))!important;left:8px!important;right:8px!important;border-radius:12px!important}
 }
 @media(max-width:430px){.stage,.clean-stage{flex-basis:34dvh!important;height:34dvh!important;min-height:215px!important}#work,#beforeWork,.compare-pane canvas{max-height:30dvh!important}.filmstrip{flex-basis:60px!important;height:60px!important;min-height:60px!important}.filmstrip>*{flex-basis:50px!important}}
+</style>
+
+<style id="duskreel-capcut-mobile">
+@media (max-width:760px){
+  body{background:#0b0b0d!important;overflow-x:hidden!important;}
+  #app{background:#0b0b0d!important;}
+  header{height:50px!important;flex:0 0 50px!important;background:#09090b!important;border-bottom:1px solid #222226!important;padding:0 12px!important;}
+  header .brand .mark-img{height:25px!important;}
+  header .brand h1{font-size:15px!important;font-weight:800!important;}
+  main{display:flex!important;flex-direction:column!important;height:calc(100dvh - 50px)!important;min-height:0!important;overflow:hidden!important;}
+  .stage,.clean-stage{order:1!important;position:relative!important;flex:0 0 42dvh!important;height:42dvh!important;min-height:235px!important;max-height:430px!important;padding:7px!important;background:#080809!important;border:0!important;border-bottom:1px solid #202024!important;overflow:hidden!important;}
+  .before-after{height:100%!important;display:flex!important;align-items:center!important;justify-content:center!important;}
+  .compare-pane{height:100%!important;display:flex!important;align-items:center!important;justify-content:center!important;}
+  .compare-pane canvas,#work,#beforeWork{max-width:96%!important;max-height:39dvh!important;width:auto!important;height:auto!important;object-fit:contain!important;pointer-events:none!important;touch-action:none!important;}
+  .history-controls{top:8px!important;left:8px!important;z-index:10!important;}
+  .filmstrip{flex:0 0 58px!important;height:58px!important;min-height:58px!important;background:#0e0e10!important;border-top:1px solid #1f1f23!important;border-bottom:1px solid #1f1f23!important;overflow-x:auto!important;}
+  .panel,.lightroom-panel{order:3!important;flex:1 1 auto!important;width:100%!important;max-width:none!important;height:auto!important;min-height:0!important;max-height:none!important;overflow-y:auto!important;overflow-x:hidden!important;background:#0b0b0d!important;border:0!important;padding-bottom:88px!important;-webkit-overflow-scrolling:touch!important;}
+  .panel .block,.lightroom-panel .block{border-bottom:1px solid #1d1d21!important;background:#0f0f12!important;}
+  #mobileEditTools{order:2!important;flex:0 0 82px!important;height:82px!important;display:flex!important;align-items:stretch!important;gap:2px!important;overflow-x:auto!important;overflow-y:hidden!important;background:#111113!important;border-bottom:1px solid #222226!important;padding:7px 8px 5px!important;scrollbar-width:none!important;-webkit-overflow-scrolling:touch!important;}
+  #mobileEditTools::-webkit-scrollbar{display:none!important;}
+  #mobileEditTools button{flex:0 0 67px!important;width:67px!important;height:70px!important;border:0!important;background:transparent!important;color:#bdbdc4!important;border-radius:9px!important;display:flex!important;flex-direction:column!important;align-items:center!important;justify-content:center!important;gap:5px!important;font:inherit!important;font-size:9px!important;font-weight:700!important;white-space:nowrap!important;touch-action:manipulation!important;}
+  #mobileEditTools button .tool-icon{width:30px;height:30px;display:flex;align-items:center;justify-content:center;border-radius:8px;background:#1b1b20;font-size:17px;color:#fff;}
+  #mobileEditTools button.active,#mobileEditTools button:active{background:#25252b!important;color:#fff!important;}
+  #mobileEditTools button.active .tool-icon{background:#fff!important;color:#111!important;}
+  .mobile-app-nav{height:62px!important;grid-template-columns:repeat(5,1fr)!important;padding:5px 5px calc(5px + env(safe-area-inset-bottom))!important;background:#09090b!important;border-top:1px solid #29292d!important;}
+  .mobile-app-nav button{min-height:50px!important;border-radius:9px!important;color:#8f8f97!important;gap:2px!important;}
+  .mobile-app-nav button span{font-size:19px!important;}
+  .mobile-app-nav button small{font-size:9px!important;}
+  .mobile-app-nav button.active{background:#202024!important;color:#fff!important;}
+  .mobile-app-nav button[data-mobile-action="download"]{background:#f1f1f3!important;color:#111!important;border-radius:9px!important;}
+  .mobile-install-banner{bottom:calc(72px + env(safe-area-inset-bottom))!important;}
+}
+@media(max-width:430px){
+  .stage,.clean-stage{flex-basis:38dvh!important;height:38dvh!important;min-height:215px!important;}
+  .compare-pane canvas,#work,#beforeWork{max-height:34dvh!important;max-width:94%!important;}
+  #mobileEditTools{flex-basis:78px!important;height:78px!important;}
+  #mobileEditTools button{flex-basis:62px!important;width:62px!important;height:66px!important;}
+}
 </style>
 </head>
 <body>
