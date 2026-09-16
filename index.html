@@ -1039,6 +1039,29 @@ main{grid-template-columns:214px minmax(0,1fr) 350px;background:#171719;}
   #mobileEditTools button{flex-basis:62px!important;width:62px!important;height:66px!important;}
 }
 </style>
+
+<style id="duskreel-final-mobile-editor-css">
+#mobileEditTools{display:none;}
+@media (max-width:760px){
+  main{height:calc(100dvh - 50px)!important;min-height:0!important;overflow:hidden!important;display:flex!important;flex-direction:column!important;}
+  .stage,.clean-stage{order:1!important;flex:0 0 38dvh!important;height:38dvh!important;min-height:215px!important;max-height:390px!important;}
+  .filmstrip{order:2!important;flex:0 0 58px!important;height:58px!important;min-height:58px!important;}
+  #mobileEditTools{order:3!important;display:flex!important;flex:0 0 78px!important;height:78px!important;width:100%!important;align-items:stretch!important;gap:4px!important;overflow-x:auto!important;overflow-y:hidden!important;background:#111114!important;border-top:1px solid #242428!important;border-bottom:1px solid #242428!important;padding:6px 8px!important;scrollbar-width:none!important;-webkit-overflow-scrolling:touch!important;z-index:30!important;}
+  #mobileEditTools::-webkit-scrollbar{display:none!important;}
+  #mobileEditTools button{flex:0 0 68px!important;width:68px!important;height:64px!important;border:0!important;border-radius:10px!important;background:transparent!important;color:#aaaab2!important;display:flex!important;flex-direction:column!important;align-items:center!important;justify-content:center!important;gap:4px!important;padding:4px!important;font-size:9px!important;font-weight:700!important;white-space:nowrap!important;touch-action:manipulation!important;}
+  #mobileEditTools button .tool-icon{width:30px!important;height:30px!important;border-radius:8px!important;background:#202025!important;color:#fff!important;display:flex!important;align-items:center!important;justify-content:center!important;font-size:17px!important;}
+  #mobileEditTools button.active{background:#29292f!important;color:#fff!important;}
+  #mobileEditTools button.active .tool-icon{background:#fff!important;color:#111!important;}
+  .panel,.lightroom-panel{order:4!important;flex:1 1 auto!important;height:auto!important;min-height:0!important;max-height:none!important;overflow-y:auto!important;overflow-x:hidden!important;padding-bottom:88px!important;-webkit-overflow-scrolling:touch!important;}
+  .mobile-app-nav{z-index:100!important;}
+  .user-pill button{position:relative!important;z-index:1500!important;pointer-events:auto!important;touch-action:manipulation!important;}
+}
+@media(max-width:430px){
+  #mobileEditTools{flex-basis:74px!important;height:74px!important;gap:2px!important;padding:5px 6px!important;}
+  #mobileEditTools button{flex-basis:62px!important;width:62px!important;height:62px!important;}
+}
+</style>
+
 </head>
 <body>
 
@@ -1104,7 +1127,20 @@ main{grid-template-columns:214px minmax(0,1fr) 350px;background:#171719;}
     </div>
   </section>
 
-  <div class="panel lightroom-panel">
+  
+<!-- DUSKREEL-FINAL-MOBILE-EDITOR-FIX -->
+<div id="mobileEditTools" aria-label="Editing tools">
+  <button type="button" data-mobile-tool="adjust"><span class="tool-icon">☼</span><span>Adjust</span></button>
+  <button type="button" data-mobile-tool="filters"><span class="tool-icon">◒</span><span>Filters</span></button>
+  <button type="button" data-mobile-tool="effects"><span class="tool-icon">✦</span><span>Effects</span></button>
+  <button type="button" data-mobile-tool="crop"><span class="tool-icon">⌗</span><span>Crop</span></button>
+  <button type="button" data-mobile-tool="retouch"><span class="tool-icon">✧</span><span>Retouch</span></button>
+  <button type="button" data-mobile-tool="ai"><span class="tool-icon">AI</span><span>AI</span></button>
+  <button type="button" data-mobile-tool="watermark"><span class="tool-icon">◇</span><span>Watermark</span></button>
+  <button type="button" data-mobile-tool="more"><span class="tool-icon">•••</span><span>More</span></button>
+</div>
+
+<div class="panel lightroom-panel">
     <div class="block">
       <h2 class="panel-title">Histogram</h2>
       <div class="histogram"><div class="curve"></div></div>
@@ -3269,6 +3305,67 @@ document.querySelectorAll('.share-grid button').forEach(b=>{
     }
   }
   if(document.readyState==='loading') document.addEventListener('DOMContentLoaded',bind); else bind();
+})();
+</script>
+
+
+<script id="duskreel-final-mobile-editor-js">
+(function(){
+  function firstBlock(selector){
+    const el=document.querySelector(selector);
+    return el ? (el.closest('.block') || el) : null;
+  }
+  function openTool(name){
+    const targets={
+      adjust: firstBlock('#expSlider'),
+      filters: firstBlock('#fxGrid'),
+      effects: firstBlock('#fxGrid'),
+      crop: firstBlock('#cropTools'),
+      retouch: firstBlock('#spotToggle'),
+      ai: firstBlock('#autoEditBtn'),
+      watermark: firstBlock('#watermarkBtn'),
+      more: document.querySelector('.panel.lightroom-panel') || document.querySelector('.panel')
+    };
+    const target=targets[name];
+    if(!target) return;
+    const panel=target.closest('.panel,.lightroom-panel');
+    if(panel) panel.scrollTo({top:Math.max(0,target.offsetTop-8),behavior:'smooth'});
+    else target.scrollIntoView({behavior:'smooth',block:'center'});
+  }
+  const tools=document.getElementById('mobileEditTools');
+  tools?.addEventListener('click',function(e){
+    const b=e.target.closest('button[data-mobile-tool]');
+    if(!b) return;
+    tools.querySelectorAll('button').forEach(x=>x.classList.remove('active'));
+    b.classList.add('active');
+    openTool(b.dataset.mobileTool);
+  });
+
+  function doLogout(){
+    try{
+      ['duskreel-user','duskreelUser','duskreel_user','duskreel-name','duskreelName','userName','username','duskreel.userName','duskreel_user_name'].forEach(k=>{localStorage.removeItem(k);sessionStorage.removeItem(k);});
+    }catch(_){ }
+    const app=document.getElementById('app');
+    const auth=document.getElementById('authScreen');
+    if(app) app.style.display='none';
+    if(auth){auth.style.display='flex';auth.removeAttribute('hidden');auth.setAttribute('aria-hidden','false');}
+    const input=document.getElementById('nameInput');
+    if(input){input.value='';setTimeout(()=>input.focus(),80);}
+    const err=document.getElementById('nameError');
+    if(err) err.classList.remove('show');
+    window.scrollTo(0,0);
+  }
+  function isLogoutButton(el){
+    if(!el) return false;
+    const text=(el.textContent||'').trim().toLowerCase();
+    return el.id==='logoutBtn' || el.dataset.action==='logout' || el.dataset.logout==='true' || /^(log\s*out|logout)$/.test(text) || text.includes('log out');
+  }
+  document.addEventListener('click',function(e){
+    const b=e.target.closest('button,[role="button"],a');
+    if(!b || !isLogoutButton(b)) return;
+    e.preventDefault();e.stopImmediatePropagation();doLogout();
+  },true);
+  window.duskreelLogout=doLogout;
 })();
 </script>
 
