@@ -6,6 +6,10 @@ on:
       - '.github/workflows/final-mobile-editor-fix.yml'
   workflow_dispatch:
 
+concurrency:
+  group: final-mobile-editor-fix-${{ github.ref }}
+  cancel-in-progress: true
+
 permissions:
   contents: write
 
@@ -28,7 +32,6 @@ jobs:
           if marker not in s:
               css = r'''
           <style id="duskreel-final-mobile-editor-css">
-          /* Final mobile editor toolbar */
           #mobileEditTools{display:none;}
           @media (max-width:760px){
             main{height:calc(100dvh - 50px)!important;min-height:0!important;overflow:hidden!important;display:flex!important;flex-direction:column!important;}
@@ -104,12 +107,12 @@ jobs:
 
             function doLogout(){
               try{
-                ['duskreel-user','duskreelUser','duskreel_user','duskreel-name','duskreelName','userName','username'].forEach(k=>{localStorage.removeItem(k);sessionStorage.removeItem(k);});
+                ['duskreel-user','duskreelUser','duskreel_user','duskreel-name','duskreelName','userName','username','duskreel.userName','duskreel_user_name'].forEach(k=>{localStorage.removeItem(k);sessionStorage.removeItem(k);});
               }catch(_){ }
               const app=document.getElementById('app');
               const auth=document.getElementById('authScreen');
               if(app) app.style.display='none';
-              if(auth){auth.style.display='flex';auth.removeAttribute('hidden');}
+              if(auth){auth.style.display='flex';auth.removeAttribute('hidden');auth.setAttribute('aria-hidden','false');}
               const input=document.getElementById('nameInput');
               if(input){input.value='';setTimeout(()=>input.focus(),80);}
               const err=document.getElementById('nameError');
