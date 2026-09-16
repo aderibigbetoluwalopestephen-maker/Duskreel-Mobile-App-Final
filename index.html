@@ -3031,7 +3031,7 @@ async function canvasToDataUrl(srcCanvas, format, quality=0.9){
   if(format === 'pdf') return canvasToPdfDataUrl(srcCanvas, quality);
   return srcCanvas.toDataURL(mimeFor(format), quality);
 }
-async async async function triggerDownload(dataUrl, filename){
+async async async async function triggerDownload(dataUrl, filename){
   try{
     const blob=dataUrlToBlob(dataUrl);
     const type=blob.type || 'image/jpeg';
