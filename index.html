@@ -3202,5 +3202,75 @@ document.querySelectorAll('.share-grid button').forEach(b=>{
 });
 
 </script>
+<!-- DUSKREEL-MOBILE-AUTH-OVERLAY-FIX -->
+<style>
+@media (max-width:760px){
+  #authScreen.duskreel-auth-hidden{display:none!important;visibility:hidden!important;opacity:0!important;pointer-events:none!important;z-index:-1!important;}
+  #app.duskreel-app-visible{display:flex!important;visibility:visible!important;opacity:1!important;pointer-events:auto!important;}
+  #app.duskreel-app-visible main{display:flex!important;visibility:visible!important;opacity:1!important;}
+}
+</style>
+<script>
+(function(){
+  function enterMobileEditor(){
+    var auth=document.getElementById('authScreen');
+    var app=document.getElementById('app');
+    var input=document.getElementById('nameInput');
+    var error=document.getElementById('nameError');
+    var label=document.getElementById('userLabel');
+    if(!auth||!app||!input) return false;
+    var name=(input.value||'').trim();
+    if(!name){
+      if(error) error.classList.add('show');
+      input.focus();
+      return false;
+    }
+    if(error) error.classList.remove('show');
+    try{localStorage.setItem('duskreel_user_name',name);}catch(e){}
+    auth.classList.add('duskreel-auth-hidden');
+    auth.setAttribute('aria-hidden','true');
+    auth.hidden=false;
+    auth.style.setProperty('display','none','important');
+    app.classList.add('duskreel-app-visible');
+    app.removeAttribute('hidden');
+    app.removeAttribute('aria-hidden');
+    app.style.setProperty('display','flex','important');
+    app.style.setProperty('visibility','visible','important');
+    app.style.setProperty('opacity','1','important');
+    var main=app.querySelector('main');
+    if(main){
+      main.hidden=false;
+      main.style.setProperty('display','flex','important');
+      main.style.setProperty('visibility','visible','important');
+      main.style.setProperty('opacity','1','important');
+    }
+    if(label) label.textContent='Signed in as '+name;
+    document.documentElement.classList.add('duskreel-editor-open');
+    document.body.classList.add('duskreel-editor-open');
+    document.body.style.overflow='auto';
+    window.scrollTo(0,0);
+    return false;
+  }
+  window.duskreelEnterMobileEditor=enterMobileEditor;
+  function bind(){
+    var form=document.getElementById('nameForm');
+    var btn=form&&form.querySelector('.auth-submit');
+    if(!form||!btn) return;
+    btn.type='button';
+    btn.onclick=function(e){e.preventDefault();e.stopPropagation();return enterMobileEditor();};
+    btn.ontouchend=function(e){e.preventDefault();e.stopPropagation();return enterMobileEditor();};
+    form.onsubmit=function(e){e.preventDefault();e.stopPropagation();return enterMobileEditor();};
+    var saved='';
+    try{saved=localStorage.getItem('duskreel_user_name')||'';}catch(e){}
+    if(saved && !btn.dataset.userRestored){
+      input=document.getElementById('nameInput');
+      if(input && !input.value) input.value=saved;
+      btn.dataset.userRestored='1';
+    }
+  }
+  if(document.readyState==='loading') document.addEventListener('DOMContentLoaded',bind); else bind();
+})();
+</script>
+
 </body>
 </html>
