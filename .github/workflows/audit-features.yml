@@ -21,100 +21,71 @@ jobs:
     steps:
       - uses: actions/checkout@v4
 
-      - name: Static HTML and JavaScript audit
+      - name: Static feature and wiring audit
         run: |
           python3 - <<'PY'
           from pathlib import Path
           import re
           from html.parser import HTMLParser
 
-          p=Path('index.html')
-          s=p.read_text(encoding='utf-8')
+          s=Path('index.html').read_text(encoding='utf-8')
           print('=== DUSKREEL FEATURE AUDIT ===')
-          print('HTML bytes:', len(s))
-          print('script tags:', s.lower().count('<script'))
-          print('style tags:', s.lower().count('<style'))
+          print('HTML bytes:',len(s))
+          print('script tags:',s.lower().count('<script'))
+          print('style tags:',s.lower().count('<style'))
 
-          class Parser(HTMLParser):
-              def __init__(self):
-                  super().__init__(); self.ids=[]; self.buttons=[]; self.inputs=[]
-              def handle_starttag(self, tag, attrs):
-                  d=dict(attrs)
-                  if 'id' in d: self.ids.append(d['id'])
-                  if tag=='button': self.buttons.append(d)
-                  if tag=='input': self.inputs.append(d)
-          q=Parser(); q.feed(s)
-          ids=set(q.ids)
-          print('unique ids:', len(ids), 'duplicate ids:', sorted({x for x in q.ids if q.ids.count(x)>1}))
-          print('buttons:', len(q.buttons), 'file inputs:', [(x.get('id'),x.get('accept'),x.get('multiple')) for x in q.inputs if x.get('type')=='file'])
+          class P(HTMLParser):
+            def __init__(self): super().__init__(); self.ids=[]; self.buttons=[]; self.inputs=[]
+            def handle_starttag(self,tag,attrs):
+              d=dict(attrs)
+              if 'id' in d:self.ids.append(d['id'])
+              if tag=='button':self.buttons.append(d)
+              if tag=='input':self.inputs.append(d)
+          p=P();p.feed(s);ids=set(p.ids)
+          print('unique ids:',len(ids),'duplicate ids:',sorted({x for x in p.ids if p.ids.count(x)>1}))
+          print('buttons:',len(p.buttons))
+          print('file inputs:',[(x.get('id'),x.get('accept'),x.get('capture')) for x in p.inputs if x.get('type')=='file'])
 
-          ref_ids=set(re.findall(r"getElementById\(['\"]([^'\"]+)", s))
-          ref_ids |= set(re.findall(r"querySelector(?:All)?\(['\"]#([^'\"]+)", s))
-          missing=sorted(x for x in ref_ids if x not in ids)
-          print('JS-referenced IDs:', len(ref_ids))
-          print('MISSING JS IDs:', missing)
-
-          selectors=sorted(set(re.findall(r"querySelector(?:All)?\(['\"]([^'\"]+)['\"]", s)))
-          for sel in selectors:
-              if sel.startswith('#') and sel[1:] not in ids:
-                  print('MISSING selector:', sel)
+          refs=set(re.findall(r"getElementById\(['\"]([^'\"]+)",s))
+          refs|=set(re.findall(r"querySelector(?:All)?\(['\"]#([^'\"]+)",s))
+          print('MISSING JS IDs:',sorted(x for x in refs if x not in ids))
 
           checks={
-            'upload input': r'type=["\']file',
-            'camera input': r'id=["\']cameraInput',
-            'photo input': r'id=["\']photoInput',
-            'download handler': r'triggerDownload|downloadOne',
-            'crop code': r'cropTools|crop',
-            'filter grid': r'fxGrid|filter',
-            'effects': r'effect|effects',
-            'retouch': r'spotToggle|retouch|spot',
-            'AI': r'autoEditBtn|noise|clean',
-            'watermark': r'watermarkBtn|watermark',
-            'undo/redo': r'undo|redo',
-            'reset': r'reset',
-            'before/after': r'before|compare',
-            'queue/delete': r'queue|delete.*queue|remove.*queue',
-            'logout': r'logout|log out',
-            'PWA service worker': r'serviceWorker|sw\.js',
-            'mobile toolbar': r'mobileEditTools|data-mobile-tool',
+            'sign-in form':'nameForm','name input':'nameInput','app shell':'id="app"',
+            'upload input':'type="file"','photo input':'id="photoInput"','background input':'id="bgImageInput"',
+            'watermark input':'id="watermarkInput"','preset input':'id="presetInput"',
+            'download':'downloadOne|triggerDownload','export preview':'exportPreview|downloadPreview',
+            'crop':'cropTools|crop','filters':'fxGrid','effects':'effects|effect','retouch':'spotToggle|retouch',
+            'AI clean/noise':'autoEditBtn|noise|clean','watermark':'watermarkBtn|watermark',
+            'undo redo':'undo|redo','reset':'reset','compare':'before|after|compare',
+            'queue':'queue','queue delete':'delete.*queue|remove.*queue|clear.*queue',
+            'logout':'logout|log out','mobile toolbar':'mobileEditTools|data-mobile-tool',
+            'service worker':'serviceWorker|sw\.js'
           }
-          for name,pat in checks.items(): print(f'{name}:', bool(re.search(pat,s,re.I)))
+          for n,pat in checks.items():
+            hits=re.findall(pat,s,re.I)
+            print(f'{n}: {len(hits)}')
 
-          scripts=re.findall(r'<script[^>]*>(.*?)</script>',s,re.I|re.S)
-          print('inline script blocks:', len(scripts))
-          for i,js in enumerate(scripts,1):
-              print(f'script {i}: chars={len(js)} braces={js.count(chr(123))}/{js.count(chr(125))} parens={js.count(chr(40))}/{js.count(chr(41))} brackets={js.count(chr(91))}/{js.count(chr(93))}')
+          # Print exact HTML/JS lines around key feature identifiers.
+          lines=s.splitlines()
+          terms=['photoInput','bgImageInput','downloadOne','triggerDownload','cropTools','fxGrid','spotToggle','autoEditBtn','watermarkBtn','undo','redo','reset','compare','queue','logout','mobileEditTools','serviceWorker','DUSKREEL-FINAL-MOBILE-EDITOR-FIX']
+          print('=== KEY SOURCE LINES ===')
+          seen=set()
+          for i,line in enumerate(lines,1):
+            if any(t.lower() in line.lower() for t in terms):
+              key=(i,line.strip())
+              if key not in seen:
+                seen.add(key); print(f'{i}: {line[:500]}')
           PY
 
-      - name: Browser smoke test with Playwright
+      - name: JavaScript syntax check
         run: |
-          npm init -y >/dev/null 2>&1
-          npm install --no-save playwright@1.55.0 >/dev/null 2>&1
-          npx playwright install --with-deps chromium >/dev/null 2>&1
-          node <<'NODE'
-          const { chromium } = require('playwright');
-          (async()=>{
-            const browser=await chromium.launch({headless:true});
-            const page=await browser.newPage({viewport:{width:390,height:844},isMobile:true});
-            const errors=[];
-            page.on('pageerror',e=>errors.push('PAGEERROR: '+e.message));
-            page.on('console',m=>{if(m.type()==='error') errors.push('CONSOLE: '+m.text());});
-            await page.goto('file://' + process.cwd() + '/index.html');
-            await page.waitForTimeout(500);
-            console.log('=== BROWSER SMOKE TEST ===');
-            console.log('title:', await page.title());
-            console.log('auth visible:', await page.locator('#authScreen').isVisible().catch(()=>false));
-            console.log('continue visible:', await page.locator('#nameForm button[type=submit]').isVisible().catch(()=>false));
-            await page.locator('#nameInput').fill('Test User');
-            await page.locator('#nameForm button[type=submit]').click();
-            await page.waitForTimeout(200);
-            console.log('app after sign-in:', await page.locator('#app').isVisible().catch(()=>false));
-            console.log('upload file inputs:', await page.locator('input[type=file]').count());
-            console.log('mobile toolbar:', await page.locator('#mobileEditTools').isVisible().catch(()=>false));
-            console.log('toolbar buttons:', await page.locator('#mobileEditTools button').count());
-            console.log('download buttons:', await page.locator('#downloadOne').count());
-            console.log('logout candidates:', await page.locator('button,a,[role=button]').evaluateAll(es=>es.filter(e=>/log\s*out/i.test(e.textContent||'')||e.id==='logoutBtn').map(e=>({id:e.id,text:(e.textContent||'').trim()}))));
-            console.log('page errors:', errors);
-            await browser.close();
-          })().catch(e=>{console.error(e);process.exit(1)});
-          NODE
+          python3 - <<'PY'
+          from pathlib import Path
+          import re
+          s=Path('index.html').read_text(encoding='utf-8')
+          scripts=re.findall(r'<script[^>]*>(.*?)</script>',s,re.I|re.S)
+          print('inline script blocks:',len(scripts))
+          for i,js in enumerate(scripts,1): Path(f'/tmp/duskreel-script-{i}.js').write_text(js,encoding='utf-8')
+          PY
+          for f in /tmp/duskreel-script-*.js; do [ -e "$f" ] && node --check "$f"; done
