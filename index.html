@@ -3031,11 +3031,39 @@ async function canvasToDataUrl(srcCanvas, format, quality=0.9){
   if(format === 'pdf') return canvasToPdfDataUrl(srcCanvas, quality);
   return srcCanvas.toDataURL(mimeFor(format), quality);
 }
-function triggerDownload(dataUrl, filename){
-  const link = document.createElement('a');
-  link.download = filename;
-  link.href = dataUrl;
-  link.click();
+async function triggerDownload(dataUrl, filename){
+  try{
+    const blob=dataUrlToBlob(dataUrl);
+    const type=blob.type || 'image/jpeg';
+    const file=new File([blob], filename, {type});
+    // Mobile Safari/iOS: use the native share/save sheet when available.
+    if(/iphone|ipad|ipod/i.test(navigator.userAgent) && navigator.share && (!navigator.canShare || navigator.canShare({files:[file]}))){
+      await navigator.share({files:[file],title:'Duskreel export'});
+      return true;
+    }
+    const url=URL.createObjectURL(blob);
+    const link=document.createElement('a');
+    link.href=url;
+    link.download=filename;
+    link.setAttribute('download',filename);
+    link.rel='noopener';
+    link.style.cssText='position:fixed;left:-9999px;width:1px;height:1px;opacity:0;';
+    document.body.appendChild(link);
+    link.click();
+    setTimeout(()=>{try{link.remove();URL.revokeObjectURL(url);}catch{}},3000);
+    return true;
+  }catch(err){
+    console.error('Download failed:',err);
+    try{
+      const blob=dataUrlToBlob(dataUrl);
+      const url=URL.createObjectURL(blob);
+      // Last fallback: open the actual file so mobile users can save it.
+      const win=window.open(url,'_blank','noopener');
+      if(!win){ window.location.href=url; }
+      setTimeout(()=>URL.revokeObjectURL(url),30000);
+      return true;
+    }catch(_){ return false; }
+  }
 }
 function dataUrlToBlob(dataUrl){
   const [header, base64] = dataUrl.split(',');
