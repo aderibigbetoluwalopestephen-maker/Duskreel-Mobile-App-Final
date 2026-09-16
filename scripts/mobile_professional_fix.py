@@ -1,0 +1,85 @@
+from pathlib import Path
+import re
+
+p=Path('index.html')
+s=p.read_text(encoding='utf-8')
+
+# Remove previous conflicting mobile mode scripts/styles.
+s=re.sub(r'<style id="duskreel-mobile-tool-modes-v1">.*?</style>\\n?', '', s, flags=re.S)
+s=re.sub(r'<script id="duskreel-mobile-tool-modes-v1">.*?</script>\\n?', '', s, flags=re.S)
+s=re.sub(r'<script id="duskreel-final-mobile-editor-js">.*?</script>\\n?', '', s, flags=re.S)
+
+# Real camera input for mobile.
+if 'id="cameraInput"' not in s:
+    s=s.replace('<input type="file" id="photoInput" accept="image/*" multiple>', '<input type="file" id="photoInput" accept="image/*" multiple>\n    <input type="file" id="cameraInput" accept="image/*" capture="environment">')
+
+marker='<!-- DUSKREEL-MOBILE-PROFESSIONAL-FIX-V2 -->'
+if marker not in s:
+    block=r'''<!-- DUSKREEL-MOBILE-PROFESSIONAL-FIX-V2 -->
+<style id="duskreel-mobile-professional-v2">
+@media(max-width:760px){
+html,body{width:100%;max-width:100%;overflow-x:hidden!important;background:#0b0b0d!important}
+#app{width:100%;height:100dvh!important;min-height:100dvh!important;overflow:hidden!important}
+header{height:50px!important;flex:0 0 50px!important;padding:0 12px!important;background:#09090b!important}
+main{height:calc(100dvh - 50px)!important;min-height:0!important;display:flex!important;flex-direction:column!important;overflow:hidden!important}
+.stage,.clean-stage{order:1!important;flex:0 0 33dvh!important;height:33dvh!important;min-height:195px!important;max-height:300px!important;width:100%!important;padding:7px!important;background:#080809!important;overflow:hidden!important}
+.before-after{width:100%!important;height:100%!important;display:flex!important;align-items:center!important;justify-content:center!important}
+.compare-pane{width:100%!important;height:100%!important;display:flex!important;align-items:center!important;justify-content:center!important}
+.compare-divider{display:none!important}
+.compare-pane canvas,#work,#beforeWork{max-width:94%!important;max-height:29dvh!important;width:auto!important;height:auto!important;object-fit:contain!important}
+.stage-empty{width:100%!important;display:flex!important;justify-content:center!important;align-items:center!important}
+.stage-empty .drop{width:min(88vw,330px)!important;min-height:135px!important;padding:18px 16px!important;border-radius:14px!important;display:flex!important;flex-direction:column!important;align-items:center!important;justify-content:center!important;gap:7px!important;background:#17171a!important}
+.mobile-upload-actions{display:flex!important;width:100%!important;gap:8px!important;margin-top:6px!important}
+.mobile-upload-actions button{flex:1!important;min-height:42px!important;border-radius:9px!important;border:1px solid #4a4a50!important;background:#29292d!important;color:#f4f4f5!important;font-weight:700!important}
+.mobile-upload-actions .primary-upload{background:#f1f1f3!important;color:#111!important;border-color:#fff!important}
+.filmstrip{order:2!important;flex:0 0 52px!important;height:52px!important;min-height:52px!important;width:100%!important;padding:5px 8px!important;background:#0e0e10!important;overflow-x:auto!important;overflow-y:hidden!important}
+.filmstrip-meta{height:14px!important;margin-bottom:2px!important}.filmstrip #thumbList{height:30px!important}.filmstrip .thumb{flex:0 0 40px!important;width:40px!important;height:30px!important}.thumb-remove{width:17px!important;height:17px!important;font-size:12px!important;line-height:15px!important;top:1px!important;right:1px!important}
+#mobileEditTools{order:3!important;flex:0 0 70px!important;height:70px!important;width:100%!important;display:flex!important;align-items:stretch!important;gap:2px!important;overflow-x:auto!important;overflow-y:hidden!important;background:#151518!important;border-top:1px solid #29292d!important;border-bottom:1px solid #29292d!important;padding:5px 7px!important;scrollbar-width:none!important;-webkit-overflow-scrolling:touch!important}
+#mobileEditTools::-webkit-scrollbar{display:none!important}
+#mobileEditTools button{flex:0 0 62px!important;width:62px!important;height:58px!important;min-height:58px!important;padding:3px!important;border:0!important;border-radius:9px!important;background:transparent!important;color:#a8a8b0!important;display:flex!important;flex-direction:column!important;align-items:center!important;justify-content:center!important;gap:3px!important;font-size:8.5px!important;font-weight:800!important;white-space:nowrap!important}
+#mobileEditTools button .tool-icon{width:27px!important;height:27px!important;border-radius:7px!important;background:#222227!important;color:#fff!important;display:flex!important;align-items:center!important;justify-content:center!important;font-size:15px!important}
+#mobileEditTools button.active{background:#303035!important;color:#fff!important}#mobileEditTools button.active .tool-icon{background:#fff!important;color:#111!important}
+.panel,.lightroom-panel{order:4!important;flex:1 1 auto!important;width:100%!important;height:auto!important;min-height:0!important;max-height:none!important;overflow-y:auto!important;overflow-x:hidden!important;background:#0b0b0d!important;border:0!important;padding:8px 9px calc(88px + env(safe-area-inset-bottom))!important;-webkit-overflow-scrolling:touch!important}
+.panel.lightroom-panel>.block.mobile-tool-hidden{display:none!important}.panel.lightroom-panel>.block.mobile-tool-visible{display:block!important}
+.panel.lightroom-panel>.block{margin:0 0 8px!important;border:1px solid #26262b!important;border-radius:11px!important;background:#111114!important;overflow:hidden!important}
+.mobile-tool-section{display:none!important;margin:0 0 8px!important;padding:12px!important;border:1px solid #29292e!important;border-radius:11px!important;background:#111114!important}.mobile-tool-section.active{display:block!important}
+.mobile-tool-section h2{margin:0 0 10px!important;font-size:11px!important;letter-spacing:.8px!important;text-transform:uppercase!important;color:#bdbdc3!important}
+.mobile-effect-grid{display:grid!important;grid-template-columns:repeat(4,minmax(0,1fr))!important;gap:7px!important}.mobile-effect-grid button{min-width:0!important;min-height:68px!important;padding:4px!important;border:1px solid #3a3a40!important;border-radius:8px!important;background:#222227!important;color:#e8e8eb!important;font-size:8px!important;font-weight:700!important}.mobile-effect-grid button .effect-swatch{display:block!important;width:100%!important;aspect-ratio:1!important;border-radius:5px!important;margin-bottom:4px!important}.mobile-effect-grid button.active{border-color:#fff!important;background:#303035!important}
+.mobile-ai-grid{display:grid!important;grid-template-columns:1fr 1fr!important;gap:7px!important}.mobile-ai-grid button{min-height:58px!important;padding:8px!important;border:1px solid #3a3a40!important;border-radius:8px!important;background:#222227!important;color:#eee!important;text-align:left!important}.mobile-ai-grid strong{display:block!important;font-size:10px!important;margin-bottom:3px!important}.mobile-ai-grid span{display:block!important;font-size:8px!important;color:#a5a5ad!important;line-height:1.35!important}
+.mobile-app-nav{z-index:2000!important}
+}
+@media(max-width:430px){.stage,.clean-stage{flex-basis:30dvh!important;height:30dvh!important;min-height:185px!important;max-height:245px!important}.compare-pane canvas,#work,#beforeWork{max-height:26dvh!important}#mobileEditTools{flex-basis:68px!important;height:68px!important}.mobile-effect-grid{grid-template-columns:repeat(3,minmax(0,1fr))!important}}
+</style>
+<div id="mobileEffectsSection" class="mobile-tool-section" aria-label="Effects"><h2>Effects</h2><div class="mobile-effect-grid" id="mobileEffectGrid"></div></div>
+<script id="duskreel-mobile-professional-v2-js">
+(function(){
+const p=()=>document.querySelector('.panel.lightroom-panel')||document.querySelector('.panel');
+const block=s=>{const e=document.querySelector(s);return e?e.closest('.block'):null};
+const tools=document.getElementById('mobileEditTools'),panel=p(); if(!tools||!panel)return;
+const drop=document.getElementById('dropZone');
+if(drop&&!drop.querySelector('.mobile-upload-actions')){const a=document.createElement('div');a.className='mobile-upload-actions';a.innerHTML='<button type="button" class="primary-upload" data-upload-action="photos">Add Photos</button><button type="button" data-upload-action="camera">Camera</button>';drop.appendChild(a);a.addEventListener('click',e=>{const b=e.target.closest('button');if(!b)return;e.preventDefault();e.stopPropagation();if(b.dataset.uploadAction==='photos')document.getElementById('photoInput')?.click();else document.getElementById('cameraInput')?.click()})}
+const cam=document.getElementById('cameraInput'),photo=document.getElementById('photoInput');
+if(cam&&photo&&!cam.dataset.bridge){cam.dataset.bridge='1';cam.addEventListener('change',()=>{if(!cam.files?.length)return;try{const dt=new DataTransfer();for(const f of cam.files)dt.items.add(f);photo.files=dt.files;photo.dispatchEvent(new Event('change',{bubbles:true}))}catch(e){console.warn(e)}})}
+const preset=block('#fxGrid'),basic=block('#expSlider'),crop=block('#cropTools'),retouch=block('#spotToggle'),watermark=block('#watermarkBtn'),ai=block('#autoEditBtn'),color=block('.grade-btn'),bg=block('#replaceBgBtn'),lens=block('#bgRemoveBtn'),presetFile=block('#presetBtn'),histogram=block('.histogram');
+const allBlocks=Array.from(panel.querySelectorAll(':scope>.block'));
+const effectSection=document.getElementById('mobileEffectsSection'),grid=document.getElementById('mobileEffectGrid');
+if(effectSection&&grid&&!effectSection.dataset.ready){effectSection.dataset.ready='1';document.querySelectorAll('#fxGrid .fx-swatch').forEach(real=>{const id=real.dataset.fx||'';if(id.startsWith('lr-')||id.startsWith('saved-fx-'))return;const b=document.createElement('button');b.type='button';const sw=real.querySelector('.fx-dot'),label=real.querySelector('span');b.innerHTML='<span class="effect-swatch"></span><span></span>';b.querySelector('.effect-swatch').style.background=sw?.style.background||'linear-gradient(135deg,#555,#222)';b.querySelector('span:last-child').textContent=label?.textContent||id;b.addEventListener('click',()=>{real.click();grid.querySelectorAll('button').forEach(x=>x.classList.toggle('active',x===b))});grid.appendChild(b)})}
+if(effectSection&&effectSection.parentElement!==panel)panel.insertBefore(effectSection,panel.firstChild);
+const groups={adjust:[basic],filters:[preset],effects:[],crop:[crop],retouch:[retouch],ai:[ai,color,bg],watermark:[watermark],more:[histogram,preset,ai,color,bg,crop,lens,retouch,watermark,presetFile,basic]};
+function clean(){allBlocks.forEach(b=>b?.classList.add('mobile-tool-hidden'));effectSection?.classList.remove('active')}
+function show(name){clean();if(name==='effects'){effectSection?.classList.add('active');panel.scrollTop=0;return}const list=(groups[name]||[]).filter(Boolean);list.forEach(b=>b.classList.remove('mobile-tool-hidden'));if(list[0])requestAnimationFrame(()=>panel.scrollTo({top:Math.max(0,list[0].offsetTop-8),behavior:'smooth'}))}
+clean();tools.querySelectorAll('button[data-mobile-tool]').forEach(b=>b.classList.remove('active'));
+tools.addEventListener('click',e=>{const b=e.target.closest('button[data-mobile-tool]');if(!b)return;tools.querySelectorAll('button[data-mobile-tool]').forEach(x=>x.classList.toggle('active',x===b));show(b.dataset.mobileTool)});
+window.duskreelMobileToolShow=show;
+})();
+</script>
+'''
+    s=s.replace('</body>',block+'\n</body>')
+
+sw=Path('sw.js')
+if sw.exists():
+    t=sw.read_text(encoding='utf-8')
+    t=re.sub(r'duskreel-mobile-v\d+','duskreel-mobile-v9',t)
+    sw.write_text(t,encoding='utf-8')
+p.write_text(s,encoding='utf-8')
+print('mobile professional fix applied')
