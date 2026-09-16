@@ -1,0 +1,70 @@
+name: Improve mobile UI and installation
+
+on:
+  push:
+    paths:
+      - '.github/workflows/capcut-mobile-fix.yml'
+  workflow_dispatch:
+
+permissions:
+  contents: write
+
+jobs:
+  patch:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - name: Patch mobile interface and installation
+        run: |
+          python3 - <<'PY'
+          from pathlib import Path
+          import re
+          p = Path('index.html')
+          s = p.read_text(encoding='utf-8')
+          css = r'''<style id="duskreel-capcut-mobile-ui">
+          @media (max-width:760px){
+            body{background:#0b0b0d!important}
+            #app{height:100dvh!important;min-height:100dvh!important;background:#0b0b0d!important}
+            header{height:54px!important;flex:0 0 54px!important;padding:0 12px!important;background:#0b0b0d!important;border-bottom:1px solid #242428!important;position:relative!important;z-index:1200!important}
+            .brand .mark-img{height:27px!important}.brand h1{font-size:15px!important;font-weight:800!important}
+            main{display:flex!important;flex:1 1 auto!important;min-height:0!important;height:auto!important;flex-direction:column!important;background:#0b0b0d!important}
+            .rail{display:none!important}
+            .stage,.clean-stage{order:1!important;position:relative!important;top:auto!important;flex:0 0 39dvh!important;height:39dvh!important;min-height:235px!important;max-height:390px!important;padding:8px 8px 4px!important;background:#111114!important;border:0!important;border-bottom:1px solid #242428!important;overflow:hidden!important}
+            #work,#beforeWork,.compare-pane canvas{max-width:94%!important;max-height:35dvh!important;pointer-events:none!important;touch-action:none!important}
+            .filmstrip{order:2!important;display:flex!important;flex:0 0 66px!important;height:66px!important;min-height:66px!important;padding:7px 10px!important;gap:6px!important;background:#0b0b0d!important;border-bottom:1px solid #242428!important;overflow-x:auto!important;overflow-y:hidden!important}
+            .filmstrip>*{flex:0 0 54px!important}
+            .panel,.lightroom-panel,.right-panel,.adjustments-panel,.sidebar-right{order:3!important;position:relative!important;flex:1 1 auto!important;width:100%!important;max-width:none!important;height:auto!important;min-height:0!important;max-height:none!important;overflow-y:auto!important;overflow-x:hidden!important;background:#101012!important;border:0!important;border-radius:0!important;padding:10px 10px calc(86px + env(safe-area-inset-bottom))!important;-webkit-overflow-scrolling:touch!important}
+            .block,.panel-block,.tool-section,.section{border-color:#27272c!important;border-radius:10px!important;background:#151519!important;margin-bottom:9px!important}
+            .mobile-app-nav{height:62px!important;padding:5px 6px calc(5px + env(safe-area-inset-bottom))!important;background:rgba(16,16,18,.98)!important;border-top:1px solid #29292e!important;box-shadow:0 -10px 30px rgba(0,0,0,.45)!important}
+            .mobile-app-nav button{min-height:50px!important;border-radius:8px!important;color:#888891!important}.mobile-app-nav button span{font-size:19px!important}.mobile-app-nav button small{font-size:9px!important;text-transform:uppercase!important;letter-spacing:.4px!important}.mobile-app-nav button.active{color:#fff!important;background:#242429!important}.mobile-app-nav button[data-mobile-action="download"]{color:#111!important;background:#f2f2f2!important;border-radius:9px!important}
+            .mobile-install-banner{bottom:calc(72px + env(safe-area-inset-bottom))!important;left:8px!important;right:8px!important;border-radius:12px!important}
+          }
+          @media(max-width:430px){.stage,.clean-stage{flex-basis:34dvh!important;height:34dvh!important;min-height:215px!important}#work,#beforeWork,.compare-pane canvas{max-height:30dvh!important}.filmstrip{flex-basis:60px!important;height:60px!important;min-height:60px!important}.filmstrip>*{flex-basis:50px!important}}
+          </style>
+          '''
+          if 'id="duskreel-capcut-mobile-ui"' not in s:
+              s = s.replace('</head>', css + '</head>', 1)
+          old = """  window.addEventListener('beforeinstallprompt',e=>{\n    e.preventDefault(); deferredInstall=e;\n    const banner=document.getElementById('mobileInstallBanner');\n    if(banner && !localStorage.getItem('duskreel-install-dismissed')) banner.hidden=false;\n  });\n  document.getElementById('installDuskreelBtn')?.addEventListener('click',async()=>{\n    if(!deferredInstall) return;\n    deferredInstall.prompt();\n    try{await deferredInstall.userChoice}catch{}\n    deferredInstall=null;\n    const banner=document.getElementById('mobileInstallBanner'); if(banner) banner.hidden=true;\n  });\n  document.getElementById('dismissInstallBtn')?.addEventListener('click',()=>{\n    localStorage.setItem('duskreel-install-dismissed','1');\n    const banner=document.getElementById('mobileInstallBanner'); if(banner) banner.hidden=true;\n  });\n"""
+          new = """  const installBanner=document.getElementById('mobileInstallBanner');\n  const installBtn=document.getElementById('installDuskreelBtn');\n  const installHelp=document.getElementById('mobileInstallHelp');\n  const isStandalone=()=>window.matchMedia('(display-mode: standalone)').matches || window.navigator.standalone===true;\n  const showInstall=()=>{if(installBanner&&!isStandalone())installBanner.hidden=false;};\n  const hideInstall=()=>{if(installBanner)installBanner.hidden=true;};\n  window.addEventListener('beforeinstallprompt',e=>{e.preventDefault();deferredInstall=e;showInstall();});\n  installBtn?.addEventListener('click',async()=>{\n    if(isStandalone()){hideInstall();return;}\n    if(deferredInstall){deferredInstall.prompt();try{const choice=await deferredInstall.userChoice;if(choice?.outcome==='accepted')hideInstall();}catch{}deferredInstall=null;return;}\n    if(installHelp)installHelp.hidden=false;\n  });\n  document.getElementById('dismissInstallBtn')?.addEventListener('click',hideInstall);\n  document.getElementById('closeInstallHelp')?.addEventListener('click',()=>{if(installHelp)installHelp.hidden=true;});\n  window.addEventListener('appinstalled',()=>{deferredInstall=null;hideInstall();});\n  if(isStandalone())hideInstall();\n"""
+          if old in s:
+              s = s.replace(old, new, 1)
+          old2 = '''<div class="mobile-install-banner" id="mobileInstallBanner" hidden>\n  <div><strong>Install Duskreel</strong><small>Use Duskreel like an app from your home screen.</small></div>\n  <button type="button" id="installDuskreelBtn">Install</button>\n  <button type="button" id="dismissInstallBtn" aria-label="Dismiss">×</button>\n</div>'''
+          new2 = '''<div class="mobile-install-banner" id="mobileInstallBanner" hidden>\n  <div><strong>Install Duskreel</strong><small>Add Duskreel to your home screen for the app experience.</small></div>\n  <button type="button" id="installDuskreelBtn">Install</button>\n  <button type="button" id="dismissInstallBtn" aria-label="Dismiss">×</button>\n</div>\n<div id="mobileInstallHelp" hidden style="position:fixed;inset:0;z-index:2000;background:rgba(0,0,0,.72);display:flex;align-items:flex-end;justify-content:center;padding:12px;">\n <div style="width:min(100%,430px);background:#17171b;border:1px solid #36363d;border-radius:16px;padding:18px;color:#fff;box-shadow:0 20px 60px rgba(0,0,0,.55);">\n  <strong style="font-size:15px;">Install Duskreel</strong>\n  <p style="color:#b8b8c0;font-size:12px;line-height:1.55;margin:10px 0 14px;">On Android Chrome, use the Install button or Chrome menu → <b>Install app</b>. On iPhone/iPad Safari, tap <b>Share</b> → <b>Add to Home Screen</b>.</p>\n  <button type="button" id="closeInstallHelp" style="width:100%;height:44px;border:0;border-radius:9px;background:#fff;color:#111;font-weight:800;">Close</button>\n </div>\n</div>'''
+          if old2 in s:
+              s = s.replace(old2, new2, 1)
+          p.write_text(s, encoding='utf-8')
+
+          sw=Path('sw.js')
+          if sw.exists():
+              x=sw.read_text(encoding='utf-8')
+              x=re.sub(r'const CACHE="[^"]+"', 'const CACHE="duskreel-mobile-v3"', x, count=1)
+              sw.write_text(x,encoding='utf-8')
+          PY
+      - name: Commit changes
+        run: |
+          git config user.name 'github-actions[bot]'
+          git config user.email '41898282+github-actions[bot]@users.noreply.github.com'
+          git add index.html sw.js
+          git diff --cached --quiet && exit 0
+          git commit -m 'Make mobile UI CapCut-style and fix install flow'
+          git push
