@@ -1,188 +1,73 @@
 name: Improve Duskreel mobile tools
-
 on:
   push:
     branches: [main]
-
 permissions:
   contents: write
-
 jobs:
-  update-mobile-ui:
+  mobile-ui:
     runs-on: ubuntu-latest
     steps:
-      - name: Checkout
-        uses: actions/checkout@v4
-
-      - name: Update mobile tools layout
+      - uses: actions/checkout@v4
+      - name: Add PixelLab-style mobile toolbar
         shell: python
         run: |
           from pathlib import Path
-
-          p = Path('index.html')
-          if not p.exists():
-              raise SystemExit('index.html not found')
-
-          s = p.read_text(encoding='utf-8')
-          marker = 'DUSKREEL-CATEGORIZED-MOBILE-TOOLS-V1'
+          p=Path('index.html')
+          s=p.read_text(encoding='utf-8')
+          marker='DUSKREEL-PIXELLAB-STYLE-TOOLS-V2'
           if marker in s:
-              print('Mobile tools update already present')
-              raise SystemExit(0)
-
-          css = r'''\n/* DUSKREEL-CATEGORIZED-MOBILE-TOOLS-V1 */
-@media (max-width:800px){
-  body{padding-bottom:0!important;overflow:hidden!important;}
-  #app{height:100dvh!important;min-height:100dvh!important;}
-  main{display:block!important;height:calc(100dvh - 52px - 60px)!important;min-height:0!important;position:relative!important;}
-  main .rail{display:none!important;}
-  main .panel{display:none!important;}
-  main .stage{position:absolute!important;inset:0!important;padding:46px 10px 18px!important;display:flex!important;align-items:center!important;justify-content:center!important;}
-  canvas#work{max-width:96vw!important;max-height:calc(100dvh - 205px)!important;}
-  .stage-label{top:8px!important;left:10px!important;}
-  .history-controls{top:8px!important;right:10px!important;}
-  .zoom-controls{top:48px!important;right:10px!important;transform:scale(.92);transform-origin:top right;}
-  .export-bar{height:60px!important;flex:0 0 60px!important;padding:0 10px!important;position:relative!important;z-index:70!important;}
-  .export-bar .count{font-size:10px!important;}
-  .export-bar .export-actions{gap:6px!important;}
-  .format-select{padding:8px 7px!important;font-size:11px!important;max-width:92px!important;}
-  .export-bar .btn-primary{padding:9px 12px!important;}
-
-  #duskMobileNav{
-    position:fixed;left:0;right:0;bottom:0;height:68px;z-index:100;
-    display:grid;grid-template-columns:repeat(6,1fr);gap:2px;
-    padding:6px 5px calc(6px + env(safe-area-inset-bottom));
-    background:rgba(16,8,18,.98);border-top:1px solid var(--line);
-    box-shadow:0 -10px 30px rgba(0,0,0,.35);backdrop-filter:blur(14px);
-  }
-  #duskMobileNav button{
-    border:0;background:transparent;color:var(--ink-dim);border-radius:10px;
-    display:flex;flex-direction:column;align-items:center;justify-content:center;gap:3px;
-    font-size:9px;font-weight:600;min-width:0;cursor:pointer;
-  }
-  #duskMobileNav button .dmn-icon{font-size:20px;line-height:20px;}
-  #duskMobileNav button.active{background:var(--panel-2);color:var(--magenta-bright);}
-
-  #duskMobileSheet{
-    position:fixed;left:0;right:0;bottom:68px;z-index:99;
-    max-height:72dvh;overflow:hidden;background:var(--panel);
-    border:1px solid var(--line);border-bottom:0;border-radius:18px 18px 0 0;
-    box-shadow:0 -18px 45px rgba(0,0,0,.55);display:none;
-  }
-  #duskMobileSheet.open{display:flex;flex-direction:column;}
-  #duskMobileSheet .dmn-sheet-head{
-    flex:0 0 auto;display:flex;align-items:center;justify-content:space-between;
-    padding:13px 15px;border-bottom:1px solid var(--line);background:var(--panel);
-  }
-  #duskMobileSheet .dmn-sheet-title{font-size:14px;font-weight:700;color:var(--ink);}
-  #duskMobileSheet .dmn-close{border:1px solid var(--line);background:var(--panel-2);color:var(--ink);border-radius:8px;width:32px;height:32px;cursor:pointer;}
-  #duskMobileSheet .dmn-sheet-body{overflow:auto;padding:0 0 16px;}
-  #duskMobileSheet .block{display:none;border-bottom:1px solid var(--line);padding:16px 15px!important;}
-  #duskMobileSheet .block.dmn-visible{display:block;}
-  #duskMobileSheet .block h2{font-size:15px!important;color:var(--ink)!important;margin-bottom:14px!important;}
-  #duskMobileSheet .block h3{font-size:11px!important;}
-  #duskMobileSheet .ai-grid{grid-template-columns:1fr 1fr!important;gap:9px!important;}
-  #duskMobileSheet .ai-tool{min-height:78px!important;padding:12px!important;font-size:12px!important;}
-  #duskMobileSheet .crop-tools{grid-template-columns:repeat(3,1fr)!important;gap:8px!important;}
-  #duskMobileSheet .crop-tools button{padding:12px 7px!important;font-size:12px!important;}
-  #duskMobileSheet .fx-grid{grid-template-columns:repeat(3,1fr)!important;gap:8px!important;}
-  #duskMobileSheet .fx-swatch{padding:6px!important;}
-  #duskMobileSheet .fx-swatch span{font-size:10px!important;}
-  #duskMobileSheet .file-btn,#duskMobileSheet .bg-remove-btn,#duskMobileSheet .spot-btn{padding:12px!important;font-size:12px!important;}
-  #duskMobileSheet input[type=range]{height:5px!important;}
-
-  #duskMobileBackdrop{position:fixed;inset:0;z-index:98;background:rgba(0,0,0,.52);display:none;}
-  #duskMobileBackdrop.show{display:block;}
+              print('already installed'); raise SystemExit(0)
+          css=r'''\n/* DUSKREEL-PIXELLAB-STYLE-TOOLS-V2 */
+@media(max-width:800px){
+body{overflow:hidden!important} #app{height:100dvh!important}
+main{display:block!important;position:relative!important;height:calc(100dvh - 52px)!important;overflow:hidden!important}
+main .rail,main .panel{display:none!important}
+main .stage{position:absolute!important;inset:0 0 150px!important;padding:42px 8px 12px!important;display:flex!important;align-items:center!important;justify-content:center!important}
+canvas#work{max-width:96vw!important;max-height:calc(100dvh - 230px)!important}
+#duskPixelDock{position:fixed;left:0;right:0;bottom:0;height:150px;z-index:90;background:#100812;border-top:1px solid var(--line);box-shadow:0 -10px 30px #0008;display:flex;flex-direction:column;padding-bottom:env(safe-area-inset-bottom)}
+#duskPixelTools{height:88px;display:flex;gap:9px;overflow-x:auto;padding:8px 10px;background:var(--panel)}
+.dpt-tool{flex:0 0 76px;border:1px solid var(--line);border-radius:9px;background:var(--panel-2);color:var(--ink);display:flex;flex-direction:column;align-items:center;justify-content:center;gap:5px;padding:7px;cursor:pointer}.dpt-tool:active{transform:scale(.96)}
+.dpt-icon{font-size:21px;line-height:22px}.dpt-label{font-size:9px;color:var(--ink-dim);text-align:center;line-height:1.1}
+.dpt-empty{min-width:100%;display:flex;align-items:center;justify-content:center;color:var(--ink-dim);font-size:11px}
+.dpt-categories{height:62px;display:flex;gap:2px;overflow-x:auto;padding:3px 4px;background:#0c070e;border-top:1px solid var(--line)}
+.dpt-cat{flex:0 0 78px;border:0;border-radius:8px;background:transparent;color:var(--ink-dim);display:flex;flex-direction:column;align-items:center;justify-content:center;gap:3px;font-size:9px;font-weight:600}.dpt-cat-icon{font-size:21px;line-height:21px}.dpt-cat.active{background:var(--panel-2);color:var(--magenta-bright)}
+.export-bar{display:none!important}
 }
-@media (min-width:801px){#duskMobileNav,#duskMobileSheet,#duskMobileBackdrop{display:none!important;}}
+@media(min-width:801px){#duskPixelDock{display:none!important}}
 '''
-
-          html = r'''\n<!-- DUSKREEL-CATEGORIZED-MOBILE-TOOLS-V1 -->
-<div id="duskMobileBackdrop"></div>
-<div id="duskMobileSheet" aria-hidden="true">
-  <div class="dmn-sheet-head"><span class="dmn-sheet-title">Editing Tools</span><button class="dmn-close" type="button" aria-label="Close tools">×</button></div>
-  <div class="dmn-sheet-body"></div>
-</div>
-<nav id="duskMobileNav" aria-label="Editing tools">
-  <button type="button" data-dmn-cat="media"><span class="dmn-icon">▣</span><span>Media</span></button>
-  <button type="button" data-dmn-cat="adjust"><span class="dmn-icon">☷</span><span>Adjust</span></button>
-  <button type="button" data-dmn-cat="effects"><span class="dmn-icon">✦</span><span>Effects</span></button>
-  <button type="button" data-dmn-cat="crop"><span class="dmn-icon">⌗</span><span>Crop</span></button>
-  <button type="button" data-dmn-cat="ai"><span class="dmn-icon">AI</span><span>AI Tools</span></button>
-  <button type="button" data-dmn-cat="export"><span class="dmn-icon">⇩</span><span>Export</span></button>
-</nav>
+          html=r'''\n<!-- DUSKREEL-PIXELLAB-STYLE-TOOLS-V2 -->
+<nav id="duskPixelDock" aria-label="Duskreel mobile editing tools">
+<div id="duskPixelTools"><div class="dpt-empty">Choose a category below</div></div>
+<div class="dpt-categories">
+<button class="dpt-cat active" data-cat="media"><span class="dpt-cat-icon">▣</span>Media</button>
+<button class="dpt-cat" data-cat="adjust"><span class="dpt-cat-icon">☷</span>Adjust</button>
+<button class="dpt-cat" data-cat="effects"><span class="dpt-cat-icon">✦</span>Effects</button>
+<button class="dpt-cat" data-cat="crop"><span class="dpt-cat-icon">⌗</span>Crop</button>
+<button class="dpt-cat" data-cat="ai"><span class="dpt-cat-icon">AI</span>AI</button>
+<button class="dpt-cat" data-cat="text"><span class="dpt-cat-icon">T</span>Text</button>
+<button class="dpt-cat" data-cat="canvas"><span class="dpt-cat-icon">□</span>Canvas</button>
+<button class="dpt-cat" data-cat="export"><span class="dpt-cat-icon">⇩</span>Export</button>
+</div></nav>
 <script>
 (function(){
-  function initDuskMobileTools(){
-    if(window.innerWidth>800) return;
-    var panel=document.querySelector('main .panel');
-    var sheet=document.getElementById('duskMobileSheet');
-    var body=sheet&&sheet.querySelector('.dmn-sheet-body');
-    var nav=document.getElementById('duskMobileNav');
-    var backdrop=document.getElementById('duskMobileBackdrop');
-    if(!panel||!sheet||!body||!nav||!backdrop) return;
-
-    var blocks=[].slice.call(panel.querySelectorAll('.block'));
-    var keys={
-      media:['upload','photo','background','image'],
-      adjust:['adjust','exposure','brightness','contrast','saturation','temperature','tint','sharpness','vignette'],
-      effects:['effect','filter','preset','art'],
-      crop:['crop','ratio','rotate','flip'],
-      ai:['ai','noise','clean','remove','spot','cartoon','sketch'],
-      export:['export','download','share']
-    };
-    function categoryFor(text){
-      text=text.toLowerCase();
-      for(var cat in keys){if(keys[cat].some(function(k){return text.indexOf(k)>=0;})) return cat;}
-      return 'adjust';
-    }
-    blocks.forEach(function(block){
-      block.dataset.dmnCategory=categoryFor(block.textContent||'');
-      body.appendChild(block);
-    });
-
-    var title=sheet.querySelector('.dmn-sheet-title');
-    function close(){
-      sheet.classList.remove('open');sheet.setAttribute('aria-hidden','true');backdrop.classList.remove('show');
-      nav.querySelectorAll('button').forEach(function(b){b.classList.remove('active');});
-    }
-    function open(cat){
-      var matches=blocks.filter(function(b){return b.dataset.dmnCategory===cat;});
-      if(!matches.length){return;}
-      title.textContent=cat==='ai'?'AI Tools':cat.charAt(0).toUpperCase()+cat.slice(1)+' Tools';
-      blocks.forEach(function(b){b.classList.toggle('dmn-visible',matches.indexOf(b)>=0);});
-      sheet.classList.add('open');sheet.setAttribute('aria-hidden','false');backdrop.classList.add('show');
-      nav.querySelectorAll('button').forEach(function(b){b.classList.toggle('active',b.dataset.dmnCat===cat);});
-      body.scrollTop=0;
-    }
-    nav.querySelectorAll('button').forEach(function(btn){
-      btn.addEventListener('click',function(){
-        var cat=btn.dataset.dmnCat;
-        if(sheet.classList.contains('open') && btn.classList.contains('active')) close(); else open(cat);
-      });
-    });
-    sheet.querySelector('.dmn-close').addEventListener('click',close);
-    backdrop.addEventListener('click',close);
-  }
-  if(document.readyState==='loading') document.addEventListener('DOMContentLoaded',initDuskMobileTools); else initDuskMobileTools();
+function init(){if(innerWidth>800)return;var p=document.querySelector('main .panel'),t=document.getElementById('duskPixelTools'),cs=[...document.querySelectorAll('.dpt-cat')];if(!p||!t)return;
+var blocks=[...p.querySelectorAll('.block')],rules={media:['upload','image','photo','import'],adjust:['brightness','contrast','saturation','exposure','temperature','tint','sharpness','vignette','adjust'],effects:['effect','filter','preset','blur','vintage','art'],crop:['crop','ratio','rotate','flip','resize'],ai:['ai','noise','clean','remove','cartoon','sketch','spot'],text:['text','font','typography'],canvas:['canvas','size','background','border','shadow'],export:['export','download','share','format']};
+function cat(b){var x=b.textContent.toLowerCase(),best='adjust',score=0;for(var k in rules){var n=rules[k].filter(q=>x.includes(q)).length;if(n>score){score=n;best=k}}return best}
+function icon(x){x=x.toLowerCase();if(x.includes('upload')||x.includes('import'))return'＋';if(x.includes('brightness')||x.includes('exposure'))return'☀';if(x.includes('contrast'))return'◐';if(x.includes('saturation'))return'◉';if(x.includes('crop'))return'⌗';if(x.includes('rotate'))return'↻';if(x.includes('flip'))return'↔';if(x.includes('ai')||x.includes('noise')||x.includes('clean'))return'AI';if(x.includes('text')||x.includes('font'))return'T';if(x.includes('canvas')||x.includes('size'))return'□';if(x.includes('download')||x.includes('export'))return'⇩';if(x.includes('filter')||x.includes('effect'))return'✦';return'•'}
+function render(c){cs.forEach(b=>b.classList.toggle('active',b.dataset.cat===c));t.innerHTML='';var seen=[];blocks.filter(b=>cat(b)===c).forEach(b=>[...b.querySelectorAll('button,.file-btn,.bg-remove-btn,.spot-btn')].forEach(e=>{var label=(e.textContent||e.getAttribute('aria-label')||e.title||'').trim();if(!label||seen.includes(label.toLowerCase()))return;seen.push(label.toLowerCase());var q=document.createElement('button');q.className='dpt-tool';q.type='button';q.innerHTML='<span class="dpt-icon">'+icon(label)+'</span><span class="dpt-label"></span>';q.querySelector('.dpt-label').textContent=label;q.onclick=()=>e.click();t.appendChild(q)}));if(!t.children.length)t.innerHTML='<div class="dpt-empty">More tools will appear here</div>'}
+cs.forEach(b=>b.onclick=()=>render(b.dataset.cat));render('media')}
+if(document.readyState==='loading')document.addEventListener('DOMContentLoaded',init);else init();
 })();
 </script>
 '''
-
-          if '</head>' not in s or '</body>' not in s:
-              raise SystemExit('index.html does not contain expected closing tags')
-          s=s.replace('</head>', css+'\n</head>', 1)
-          s=s.replace('</body>', html+'\n</body>', 1)
-          p.write_text(s, encoding='utf-8')
-          print('Updated index.html with categorized mobile tools')
-
-      - name: Commit mobile UI changes
+          s=s.replace('</head>',css+'\n</head>',1).replace('</body>',html+'\n</body>',1)
+          p.write_text(s,encoding='utf-8')
+      - name: Commit
         run: |
           git config user.name "github-actions[bot]"
           git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
           git add index.html
-          if git diff --cached --quiet; then
-            echo "No changes to commit"
-            exit 0
-          fi
-          git commit -m "Improve mobile editing tools navigation"
+          if git diff --cached --quiet; then exit 0; fi
+          git commit -m "Make mobile editor tools PixelLab-style"
           git push
