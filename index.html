@@ -1071,6 +1071,7 @@ main{grid-template-columns:214px minmax(0,1fr) 350px;background:#171719;}
 \n
 
 
+
 <style id="duskreel-mobile-stable-v9">
 /* DUSKREEL MOBILE STABLE V9 */
 @media(max-width:760px){
@@ -1107,6 +1108,15 @@ main{grid-template-columns:214px minmax(0,1fr) 350px;background:#171719;}
 @media(max-width:430px){main .stage,main .clean-stage{flex-basis:32dvh!important;height:32dvh!important;min-height:180px!important;max-height:240px!important}.compare-pane canvas,#work,#beforeWork{max-height:29dvh!important}#duskPixelDock{height:76px!important;min-height:76px!important;flex-basis:76px!important}.dpt-categories{height:76px!important;min-height:76px!important;padding-top:5px!important}.dpt-cat{height:64px!important;flex-basis:58px!important;width:58px!important}}
 </style>
 
+
+<style id="duskreel-mobile-space-fix">
+@media(max-width:760px){
+  /* Do not leave a giant empty panel under the toolbar. Open it only when a category is tapped. */
+  main .panel{display:none!important;flex:none!important;height:0!important;max-height:0!important;min-height:0!important;overflow:hidden!important;padding:0!important}
+  main.dusk-panel-open .panel{display:block!important;flex:1 1 auto!important;height:auto!important;max-height:none!important;min-height:0!important;overflow-y:auto!important;padding:8px 9px 12px!important}
+  #duskPixelDock{order:4!important}
+}
+</style>
 </head>
 <body>
 
@@ -1399,6 +1409,7 @@ main{grid-template-columns:214px minmax(0,1fr) 350px;background:#171719;}
 
 <!-- DUSKREEL-MOBILE-EDITOR-FIX-V6 -->
 
+
 <script id="duskreel-mobile-stable-v9-js">
 (function(){
  function mobile(){return innerWidth<=760;}
@@ -1417,6 +1428,27 @@ main{grid-template-columns:214px minmax(0,1fr) 350px;background:#171719;}
 })();
 </script>
 
+
+<script id="duskreel-mobile-space-fix-js">
+(function(){
+  function init(){
+    if(innerWidth>760)return;
+    var main=document.querySelector('main'),dock=document.getElementById('duskPixelDock');
+    if(!main||!dock||dock.dataset.spaceFix)return;
+    dock.dataset.spaceFix='1';
+    dock.querySelectorAll('.dpt-cat').forEach(function(cat){
+      cat.addEventListener('click',function(){
+        main.classList.add('dusk-panel-open');
+        var map={adjust:'#expSlider',effects:'#fxGrid',crop:'#cropTools',ai:'#autoEditBtn',media:'#photoInput',export:'#exportAll',text:'#watermarkBtn',canvas:'#watermarkBtn'};
+        var t=document.querySelector(map[cat.dataset.cat]);
+        var panel=main.querySelector('.panel');
+        if(t&&panel)setTimeout(function(){panel.scrollTo({top:Math.max(0,t.closest('.block')?.offsetTop||0),behavior:'smooth'});},30);
+      });
+    });
+  }
+  if(document.readyState==='loading')document.addEventListener('DOMContentLoaded',init);else init();
+})();
+</script>
 </body>
 </html>
 
