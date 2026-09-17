@@ -2,16 +2,91 @@ from pathlib import Path
 
 p = Path('index.html')
 s = p.read_text(encoding='utf-8')
-marker = 'DUSKREEL-PIXELLAB-STYLE-TOOLS-V3'
+marker = 'DUSKREEL-MOBILE-CANVAS-UPLOAD-FIX-V4'
 if marker in s:
-    print('PixelLab mobile toolbar already installed')
+    print('Mobile canvas/upload fix already installed')
     raise SystemExit(0)
 
-css = '''\n/* DUSKREEL-PIXELLAB-STYLE-TOOLS-V3 */\n@media (max-width:800px){\n  body{overflow:hidden!important}\n  #app{height:100dvh!important}\n  main{display:block!important;position:relative!important;height:calc(100dvh - 52px)!important;overflow:hidden!important}\n  main .rail,main .panel{display:none!important}\n  main .stage{position:absolute!important;inset:0 0 150px!important;padding:42px 8px 12px!important;display:flex!important;align-items:center!important;justify-content:center!important}\n  canvas#work{max-width:96vw!important;max-height:calc(100dvh - 230px)!important}\n  #duskPixelDock{position:fixed;left:0;right:0;bottom:0;height:150px;z-index:999;background:#100812;border-top:1px solid var(--line);box-shadow:0 -10px 30px #0008;display:flex;flex-direction:column;padding-bottom:env(safe-area-inset-bottom)}\n  #duskPixelTools{height:88px;display:flex;gap:9px;overflow-x:auto;padding:8px 10px;background:var(--panel)}\n  .dpt-tool{flex:0 0 76px;border:1px solid var(--line);border-radius:9px;background:var(--panel-2);color:var(--ink);display:flex;flex-direction:column;align-items:center;justify-content:center;gap:5px;padding:7px;cursor:pointer}\n  .dpt-icon{font-size:21px;line-height:22px}.dpt-label{font-size:9px;color:var(--ink-dim);text-align:center;line-height:1.1}\n  .dpt-empty{min-width:100%;display:flex;align-items:center;justify-content:center;color:var(--ink-dim);font-size:11px}\n  .dpt-categories{height:62px;display:flex;gap:2px;overflow-x:auto;padding:3px 4px;background:#0c070e;border-top:1px solid var(--line)}\n  .dpt-cat{flex:0 0 78px;border:0;border-radius:8px;background:transparent;color:var(--ink-dim);display:flex;flex-direction:column;align-items:center;justify-content:center;gap:3px;font-size:9px;font-weight:600}\n  .dpt-cat-icon{font-size:21px;line-height:21px}.dpt-cat.active{background:var(--panel-2);color:var(--magenta-bright)}\n  .export-bar{display:none!important}\n}\n@media (min-width:801px){#duskPixelDock{display:none!important}}\n'''
+css = r'''
+/* DUSKREEL-MOBILE-CANVAS-UPLOAD-FIX-V4 */
+@media (max-width:800px){
+  body{overflow:hidden!important}
+  #app{height:100dvh!important}
+  main{display:block!important;position:relative!important;height:calc(100dvh - 52px)!important;overflow:hidden!important}
+  main .rail,main .panel{display:none!important}
+  main .stage{
+    position:absolute!important;left:0!important;right:0!important;top:0!important;bottom:112px!important;
+    padding:8px!important;margin:0!important;display:flex!important;align-items:center!important;justify-content:center!important;
+    overflow:hidden!important;background:#080808!important;
+  }
+  canvas#work{max-width:100%!important;max-height:100%!important;width:auto!important;height:auto!important;object-fit:contain!important}
+  /* Hide the original upload/drop card once a photo has been loaded. */
+  body.dusk-has-photos #dropZone,
+  body.dusk-has-photos .drop-zone,
+  body.dusk-has-photos .upload-zone,
+  body.dusk-has-photos [class*="drop-zone"],
+  body.dusk-has-photos [class*="upload-zone"]{display:none!important}
+  /* Two equal before/after panes under the header and above the tool dock. */
+  #duskBeforeAfter{position:absolute;inset:8px;z-index:7;display:none;background:#050505;border-radius:8px;overflow:hidden}
+  body.dusk-has-photos #duskBeforeAfter{display:flex}
+  #duskBeforeAfter .dba-pane{position:relative;flex:1 1 50%;width:50%;min-width:0;display:flex;align-items:center;justify-content:center;overflow:hidden;background:#080808}
+  #duskBeforeAfter .dba-pane+.dba-pane{border-left:2px solid #080808}
+  #duskBeforeAfter img{width:100%;height:100%;object-fit:contain;display:block}
+  #duskBeforeAfter .dba-label{position:absolute;left:9px;top:9px;padding:5px 8px;border-radius:5px;background:#000c;color:#fff;font-size:11px;font-weight:700;z-index:2}
+  #duskPixelDock{height:112px!important}
+  #duskPixelTools{height:64px!important}
+  .dpt-categories{height:48px!important}
+  .export-bar{display:none!important}
+}
+@media (min-width:801px){#duskBeforeAfter{display:none!important}}
+'''
 
-html = '''\n<!-- DUSKREEL-PIXELLAB-STYLE-TOOLS-V3 -->\n<nav id="duskPixelDock" aria-label="Duskreel mobile editing tools">\n  <div id="duskPixelTools"><div class="dpt-empty">Choose a category below</div></div>\n  <div class="dpt-categories">\n    <button class="dpt-cat active" data-cat="media"><span class="dpt-cat-icon">▣</span>Media</button>\n    <button class="dpt-cat" data-cat="adjust"><span class="dpt-cat-icon">☷</span>Adjust</button>\n    <button class="dpt-cat" data-cat="effects"><span class="dpt-cat-icon">✦</span>Effects</button>\n    <button class="dpt-cat" data-cat="crop"><span class="dpt-cat-icon">⌗</span>Crop</button>\n    <button class="dpt-cat" data-cat="ai"><span class="dpt-cat-icon">AI</span>AI</button>\n    <button class="dpt-cat" data-cat="text"><span class="dpt-cat-icon">T</span>Text</button>\n    <button class="dpt-cat" data-cat="canvas"><span class="dpt-cat-icon">□</span>Canvas</button>\n    <button class="dpt-cat" data-cat="export"><span class="dpt-cat-icon">⇩</span>Export</button>\n  </div>\n</nav>\n<script>\n(function(){\n  function init(){\n    if(innerWidth>800)return;\n    var panel=document.querySelector('main .panel'),tools=document.getElementById('duskPixelTools'),cats=[...document.querySelectorAll('.dpt-cat')];\n    if(!panel||!tools)return;\n    var blocks=[...panel.querySelectorAll('.block')];\n    var rules={media:['upload','image','photo','import'],adjust:['brightness','contrast','saturation','exposure','temperature','tint','sharpness','vignette','adjust'],effects:['effect','filter','preset','blur','vintage','art'],crop:['crop','ratio','rotate','flip','resize'],ai:['ai','noise','clean','remove','cartoon','sketch','spot'],text:['text','font','typography'],canvas:['canvas','size','background','border','shadow'],export:['export','download','share','format']};\n    function category(block){var text=block.textContent.toLowerCase(),best='adjust',score=0;for(var key in rules){var n=rules[key].filter(function(q){return text.includes(q)}).length;if(n>score){score=n;best=key}}return best}\n    function icon(text){text=text.toLowerCase();if(text.includes('upload')||text.includes('import'))return'＋';if(text.includes('brightness')||text.includes('exposure'))return'☀';if(text.includes('contrast'))return'◐';if(text.includes('saturation'))return'◉';if(text.includes('crop'))return'⌗';if(text.includes('rotate'))return'↻';if(text.includes('flip'))return'↔';if(text.includes('ai')||text.includes('noise')||text.includes('clean'))return'AI';if(text.includes('text')||text.includes('font'))return'T';if(text.includes('canvas')||text.includes('size'))return'□';if(text.includes('download')||text.includes('export'))return'⇩';if(text.includes('filter')||text.includes('effect'))return'✦';return'•'}\n    function render(key){\n      cats.forEach(function(c){c.classList.toggle('active',c.dataset.cat===key)});\n      tools.innerHTML='';var seen=[];\n      blocks.filter(function(b){return category(b)===key}).forEach(function(b){\n        [...b.querySelectorAll('button,.file-btn,.bg-remove-btn,.spot-btn')].forEach(function(e){\n          var label=(e.textContent||e.getAttribute('aria-label')||e.title||'').trim();\n          if(!label||seen.includes(label.toLowerCase()))return;seen.push(label.toLowerCase());\n          var q=document.createElement('button');q.className='dpt-tool';q.type='button';\n          q.innerHTML='<span class="dpt-icon">'+icon(label)+'</span><span class="dpt-label"></span>';\n          q.querySelector('.dpt-label').textContent=label;q.onclick=function(){e.click()};tools.appendChild(q);\n        });\n      });\n      if(!tools.children.length)tools.innerHTML='<div class="dpt-empty">More tools will appear here</div>';\n    }\n    cats.forEach(function(c){c.onclick=function(){render(c.dataset.cat)}});render('media');\n  }\n  if(document.readyState==='loading')document.addEventListener('DOMContentLoaded',init);else init();\n})();\n</script>\n'''
+html = r'''
+<!-- DUSKREEL-MOBILE-CANVAS-UPLOAD-FIX-V4 -->
+<div id="duskBeforeAfter" aria-label="Before and after preview">
+  <div class="dba-pane"><span class="dba-label">Before</span><img id="duskBeforeImg" alt="Before preview"></div>
+  <div class="dba-pane"><span class="dba-label">After</span><img id="duskAfterImg" alt="After preview"></div>
+</div>
+<script>
+(function(){
+  function isRealPhoto(img){return img && img.tagName==='IMG' && img.naturalWidth>0 && img.src && !img.closest('#authScreen') && !img.closest('#duskBeforeAfter')}
+  function findPhoto(){
+    var imgs=document.querySelectorAll('main img');
+    for(var i=0;i<imgs.length;i++) if(isRealPhoto(imgs[i])) return imgs[i];
+    return null;
+  }
+  function sync(){
+    var img=findPhoto();
+    var before=document.getElementById('duskBeforeImg'),after=document.getElementById('duskAfterImg');
+    if(!before||!after)return;
+    var loaded=!!img;
+    if(img){before.src=img.src;after.src=img.src}
+    document.body.classList.toggle('dusk-has-photos',loaded);
+  }
+  function hideUpload(){
+    var text=(document.body.innerText||'').toLowerCase();
+    var loaded=/\b\d+\s+photos?\s+loaded\b/.test(text) || !!findPhoto();
+    document.body.classList.toggle('dusk-has-photos',loaded);
+  }
+  function init(){
+    var stage=document.querySelector('main .stage');
+    if(!stage)return;
+    if(!document.getElementById('duskBeforeAfter')){
+      var wrap=document.createElement('div');wrap.id='duskBeforeAfter';
+      wrap.innerHTML='<div class="dba-pane"><span class="dba-label">Before</span><img id="duskBeforeImg" alt="Before preview"></div><div class="dba-pane"><span class="dba-label">After</span><img id="duskAfterImg" alt="After preview"></div>';
+      stage.appendChild(wrap);
+    }
+    sync();hideUpload();
+    var observer=new MutationObserver(function(){sync();hideUpload()});
+    observer.observe(document.body,{subtree:true,childList:true,attributes:true,attributeFilter:['src','class','style']});
+    setInterval(function(){sync();hideUpload()},800);
+  }
+  if(document.readyState==='loading')document.addEventListener('DOMContentLoaded',init);else init();
+})();
+</script>
+'''
 
 s = s.replace('</head>', css + '\n</head>', 1)
 s = s.replace('</body>', html + '\n</body>', 1)
 p.write_text(s, encoding='utf-8')
-print('PixelLab mobile toolbar installed')
+print('Mobile canvas/upload fix installed')
