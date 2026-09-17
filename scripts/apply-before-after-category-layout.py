@@ -4,9 +4,7 @@ import re
 path = Path('index.html')
 text = path.read_text(encoding='utf-8')
 
-# The previous category-layout patch was too aggressive on mobile and could
-# interfere with the existing editor lifecycle. Remove that patch and keep
-# the stable V8 mobile editor as the source of truth.
+# Remove the old unstable category-layout patch if it is still present.
 text, n_style = re.subn(
     r'<style[^>]*id=["\']duskreel-before-after-category-layout-v1["\'][^>]*>.*?</style>\s*',
     '', text, flags=re.S | re.I
@@ -16,5 +14,13 @@ text, n_script = re.subn(
     '', text, flags=re.S | re.I
 )
 
+# Critical cleanup: an older patch was accidentally written as raw CSS text
+# between HTML style blocks. A browser renders that text visibly on the page.
+# Remove the entire raw V3/V4 block while preserving the valid V6 style tag.
+text, n_raw = re.subn(
+    r'\\n?\\s*/\\* DUSKREEL-PIXELLAB-STYLE-TOOLS-V3 \\*/.*?(?=<style[^>]*id=["\']duskreel-mobile-editor-fix-v6["\'])',
+    '', text, flags=re.S | re.I
+)
+
 path.write_text(text, encoding='utf-8')
-print(f'Removed unstable mobile category-layout patch: style={n_style}, script={n_script}')
+print(f'Cleaned mobile index: old_style={n_style}, old_script={n_script}, raw_css_block={n_raw}')
