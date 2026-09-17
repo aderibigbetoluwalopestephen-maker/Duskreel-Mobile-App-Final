@@ -16,9 +16,10 @@ text, n_script = re.subn(
 
 # Critical cleanup: an older patch was accidentally written as raw CSS text
 # between valid HTML style blocks. Browsers render that raw text visibly.
-# Remove the entire raw V3/V4 CSS block and preserve the valid V6 style tag.
+# The old file also contains escaped quotes (\") around some style attributes,
+# so the boundary intentionally matches the V6 marker without depending on quotes.
 text, n_raw = re.subn(
-    r'/\* DUSKREEL-PIXELLAB-STYLE-TOOLS-V3 \*/.*?(?=<style[^>]*id=["\']duskreel-mobile-editor-fix-v6["\'])',
+    r'/\* DUSKREEL-PIXELLAB-STYLE-TOOLS-V3 \*/.*?(?=<style[^>]*duskreel-mobile-editor-fix-v6)',
     '', text, flags=re.S | re.I
 )
 
