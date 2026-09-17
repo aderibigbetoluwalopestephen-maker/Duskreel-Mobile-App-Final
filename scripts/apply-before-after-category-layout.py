@@ -15,10 +15,10 @@ text, n_script = re.subn(
 )
 
 # Critical cleanup: an older patch was accidentally written as raw CSS text
-# between HTML style blocks. A browser renders that text visibly on the page.
-# Remove the entire raw V3/V4 block while preserving the valid V6 style tag.
+# between valid HTML style blocks. Browsers render that raw text visibly.
+# Remove the entire raw V3/V4 CSS block and preserve the valid V6 style tag.
 text, n_raw = re.subn(
-    r'\\n?\\s*/\\* DUSKREEL-PIXELLAB-STYLE-TOOLS-V3 \\*/.*?(?=<style[^>]*id=["\']duskreel-mobile-editor-fix-v6["\'])',
+    r'/\* DUSKREEL-PIXELLAB-STYLE-TOOLS-V3 \*/.*?(?=<style[^>]*id=["\']duskreel-mobile-editor-fix-v6["\'])',
     '', text, flags=re.S | re.I
 )
 
