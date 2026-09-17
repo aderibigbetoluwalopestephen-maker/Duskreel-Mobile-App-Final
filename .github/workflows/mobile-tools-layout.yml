@@ -14,8 +14,10 @@ jobs:
       - uses: actions/checkout@v4
       - name: Install PixelLab-style mobile toolbar
         run: python3 scripts/add-mobile-tools.py
-      - name: Apply Before After category layout
+      - name: Apply stable mobile layout
         run: python3 scripts/apply-before-after-category-layout.py
+      - name: Tighten mobile spacing
+        run: python3 scripts/mobile-space-fix.py
       - name: Commit generated mobile UI
         run: |
           git config user.name "github-actions[bot]"
@@ -25,5 +27,5 @@ jobs:
             echo "No changes needed"
             exit 0
           fi
-          git commit -m "Apply mobile Before After category layout"
+          git commit -m "Apply final mobile layout"
           git push
