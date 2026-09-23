@@ -20,6 +20,8 @@ jobs:
         run: python3 scripts/mobile-space-fix.py
       - name: Add mobile Download dropdown
         run: python3 scripts/mobile-download-menu.py
+      - name: Add Lightroom-style mobile editing
+        run: python3 scripts/add-mobile-lightroom-pro.py
       - name: Commit generated mobile UI
         run: |
           git config user.name "github-actions[bot]"
@@ -29,5 +31,5 @@ jobs:
             echo "No changes needed"
             exit 0
           fi
-          git commit -m "Move preview and download into mobile dropdown"
+          git commit -m "Add Lightroom-style mobile editing tools"
           git push
