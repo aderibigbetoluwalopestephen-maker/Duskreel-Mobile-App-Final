@@ -1429,105 +1429,6 @@ main{grid-template-columns:214px minmax(0,1fr) 350px;background:#171719;}
 <!-- DUSKREEL-MOBILE-EDITOR-FIX-V6 -->
 
 
-<script id="duskreel-mobile-stable-v9-js">
-(function(){
- function mobile(){return innerWidth<=760;}
- function hasPhoto(){
-  var a=document.querySelectorAll('#thumbList img,.filmstrip img');
-  for(var i=0;i<a.length;i++)if(a[i].naturalWidth>0||a[i].src)return true;
-  var ba=document.getElementById('beforeAfter');
-  return !!(ba&&getComputedStyle(ba).display!=='none');
- }
- function sync(){if(!mobile())return;var loaded=hasPhoto();document.body.classList.toggle('dusk-has-photos',loaded);var e=document.getElementById('stageEmpty'),ba=document.getElementById('beforeAfter');if(e)e.style.setProperty('display',loaded?'none':'','important');if(ba&&loaded)ba.style.setProperty('display','flex','important');}
- function uploads(){var d=document.getElementById('dropZone');if(!d||d.querySelector('.mobile-upload-actions'))return;var w=document.createElement('div');w.className='mobile-upload-actions';w.innerHTML='<button type="button" class="primary-upload" data-upload="photos">Add Photos</button><button type="button" data-upload="camera">Camera</button>';d.appendChild(w);w.addEventListener('click',function(e){var b=e.target.closest('button');if(!b)return;e.preventDefault();e.stopPropagation();var x=document.getElementById(b.dataset.upload==='camera'?'cameraInput':'photoInput');if(x)x.click();});}
- function bind(){uploads();var p=document.getElementById('photoInput'),c=document.getElementById('cameraInput');if(p&&!p.dataset.v9){p.dataset.v9='1';p.addEventListener('change',function(){setTimeout(sync,250);});}if(c&&!c.dataset.v9){c.dataset.v9='1';c.addEventListener('change',function(){setTimeout(sync,250);});}sync();setTimeout(sync,900);setTimeout(sync,1800);}
- function dock(){var d=document.getElementById('duskPixelDock');if(!d||d.dataset.v9)return;d.dataset.v9='1';d.querySelectorAll('.dpt-cat').forEach(function(cat){cat.addEventListener('click',function(){d.querySelectorAll('.dpt-cat').forEach(function(x){x.classList.toggle('active',x===cat);});var map={adjust:'#expSlider',effects:'#fxGrid',crop:'#cropTools',ai:'#autoEditBtn',media:'#photoInput',export:'#exportAll',text:'#watermarkBtn',canvas:'#watermarkBtn'},t=document.querySelector(map[cat.dataset.cat]),panel=document.querySelector('main .panel');if(t&&panel)panel.scrollTo({top:Math.max(0,t.closest('.block')?.offsetTop||0),behavior:'smooth'});});});}
- function init(){bind();dock();}
- if(document.readyState==='loading')document.addEventListener('DOMContentLoaded',init);else init();
-})();
-</script>
-
-
-<script id="duskreel-mobile-space-fix-js">
-(function(){
-  function init(){
-    if(innerWidth>760)return;
-    var main=document.querySelector('main'),dock=document.getElementById('duskPixelDock');
-    if(!main||!dock||dock.dataset.spaceFix)return;
-    dock.dataset.spaceFix='1';
-    dock.querySelectorAll('.dpt-cat').forEach(function(cat){
-      cat.addEventListener('click',function(){
-        main.classList.add('dusk-panel-open');
-        var map={adjust:'#expSlider',effects:'#fxGrid',crop:'#cropTools',ai:'#autoEditBtn',media:'#photoInput',export:'#exportAll',text:'#watermarkBtn',canvas:'#watermarkBtn'};
-        var t=document.querySelector(map[cat.dataset.cat]);
-        var panel=main.querySelector('.panel');
-        if(t&&panel)setTimeout(function(){panel.scrollTo({top:Math.max(0,t.closest('.block')?.offsetTop||0),behavior:'smooth'});},30);
-      });
-    });
-  }
-  if(document.readyState==='loading')document.addEventListener('DOMContentLoaded',init);else init();
-})();
-</script>
-
-<script id="duskreel-mobile-download-menu-js">
-(function(){
-  function mobile(){return window.innerWidth<=760;}
-  function findLogout(){
-    var buttons=document.querySelectorAll('header button');
-    for(var i=0;i<buttons.length;i++){
-      var t=(buttons[i].textContent||'').trim().toLowerCase();
-      if(t==='logout'||t.indexOf('logout')===0)return buttons[i];
-    }
-    return null;
-  }
-  function callAction(selector){
-    var b=document.querySelector(selector);
-    if(b){b.click();return true;}
-    return false;
-  }
-  function install(){
-    if(!mobile())return;
-    var logout=findLogout();
-    if(!logout)return;
-    if(document.querySelector('header .dusk-download-wrap'))return;
-
-    var wrap=document.createElement('div');
-    wrap.className='dusk-download-wrap';
-    wrap.innerHTML='<button type="button" class="dusk-download-trigger" aria-haspopup="menu" aria-expanded="false">Download <span class="dusk-download-chevron">▾</span></button>'+
-      '<div class="dusk-download-popover" role="menu">'+
-      '<button type="button" data-download-action="preview">Preview <strong>VIEW</strong></button>'+
-      '<button type="button" data-download-action="download">Download <strong>SAVE</strong></button>'+
-      '</div>';
-
-    logout.parentNode.insertBefore(wrap,logout);
-    var trigger=wrap.querySelector('.dusk-download-trigger');
-    var pop=wrap.querySelector('.dusk-download-popover');
-    trigger.addEventListener('click',function(e){
-      e.preventDefault();e.stopPropagation();
-      var open=pop.classList.toggle('open');
-      trigger.setAttribute('aria-expanded',open?'true':'false');
-    });
-    pop.addEventListener('click',function(e){
-      var b=e.target.closest('button');
-      if(!b)return;
-      e.preventDefault();e.stopPropagation();
-      pop.classList.remove('open');
-      trigger.setAttribute('aria-expanded','false');
-      if(b.dataset.downloadAction==='preview')callAction('#duskMobileActions .dusk-preview-btn');
-      if(b.dataset.downloadAction==='download')callAction('#duskMobileActions .dusk-download-btn');
-    });
-    document.addEventListener('click',function(e){
-      if(!wrap.contains(e.target)){
-        pop.classList.remove('open');
-        trigger.setAttribute('aria-expanded','false');
-      }
-    });
-  }
-  function init(){install();setTimeout(install,500);setTimeout(install,1500);}
-  if(document.readyState==='loading')document.addEventListener('DOMContentLoaded',init);else init();
-})();
-</script>
-
 <!-- DUSKREEL MOBILE LIGHTROOM PRO V1 -->
 <style id="duskreel-mobile-lightroom-pro-css">
 @media(max-width:760px){
@@ -1633,6 +1534,107 @@ main{grid-template-columns:214px minmax(0,1fr) 350px;background:#171719;}
 })();
 </script>
 <!-- /DUSKREEL MOBILE LIGHTROOM PRO V1 -->
+
+
+<script id="duskreel-mobile-stable-v9-js">
+(function(){
+ function mobile(){return innerWidth<=760;}
+ function hasPhoto(){
+  var a=document.querySelectorAll('#thumbList img,.filmstrip img');
+  for(var i=0;i<a.length;i++)if(a[i].naturalWidth>0||a[i].src)return true;
+  var ba=document.getElementById('beforeAfter');
+  return !!(ba&&getComputedStyle(ba).display!=='none');
+ }
+ function sync(){if(!mobile())return;var loaded=hasPhoto();document.body.classList.toggle('dusk-has-photos',loaded);var e=document.getElementById('stageEmpty'),ba=document.getElementById('beforeAfter');if(e)e.style.setProperty('display',loaded?'none':'','important');if(ba&&loaded)ba.style.setProperty('display','flex','important');}
+ function uploads(){var d=document.getElementById('dropZone');if(!d||d.querySelector('.mobile-upload-actions'))return;var w=document.createElement('div');w.className='mobile-upload-actions';w.innerHTML='<button type="button" class="primary-upload" data-upload="photos">Add Photos</button><button type="button" data-upload="camera">Camera</button>';d.appendChild(w);w.addEventListener('click',function(e){var b=e.target.closest('button');if(!b)return;e.preventDefault();e.stopPropagation();var x=document.getElementById(b.dataset.upload==='camera'?'cameraInput':'photoInput');if(x)x.click();});}
+ function bind(){uploads();var p=document.getElementById('photoInput'),c=document.getElementById('cameraInput');if(p&&!p.dataset.v9){p.dataset.v9='1';p.addEventListener('change',function(){setTimeout(sync,250);});}if(c&&!c.dataset.v9){c.dataset.v9='1';c.addEventListener('change',function(){setTimeout(sync,250);});}sync();setTimeout(sync,900);setTimeout(sync,1800);}
+ function dock(){var d=document.getElementById('duskPixelDock');if(!d||d.dataset.v9)return;d.dataset.v9='1';d.querySelectorAll('.dpt-cat').forEach(function(cat){cat.addEventListener('click',function(){d.querySelectorAll('.dpt-cat').forEach(function(x){x.classList.toggle('active',x===cat);});var map={adjust:'#expSlider',effects:'#fxGrid',crop:'#cropTools',ai:'#autoEditBtn',media:'#photoInput',export:'#exportAll',text:'#watermarkBtn',canvas:'#watermarkBtn'},t=document.querySelector(map[cat.dataset.cat]),panel=document.querySelector('main .panel');if(t&&panel)panel.scrollTo({top:Math.max(0,t.closest('.block')?.offsetTop||0),behavior:'smooth'});});});}
+ function init(){bind();dock();}
+ if(document.readyState==='loading')document.addEventListener('DOMContentLoaded',init);else init();
+})();
+</script>
+
+
+<script id="duskreel-mobile-space-fix-js">
+(function(){
+  function init(){
+    if(innerWidth>760)return;
+    var main=document.querySelector('main'),dock=document.getElementById('duskPixelDock');
+    if(!main||!dock||dock.dataset.spaceFix)return;
+    dock.dataset.spaceFix='1';
+    dock.querySelectorAll('.dpt-cat').forEach(function(cat){
+      cat.addEventListener('click',function(){
+        main.classList.add('dusk-panel-open');
+        var map={adjust:'#expSlider',effects:'#fxGrid',crop:'#cropTools',ai:'#autoEditBtn',media:'#photoInput',export:'#exportAll',text:'#watermarkBtn',canvas:'#watermarkBtn'};
+        var t=document.querySelector(map[cat.dataset.cat]);
+        var panel=main.querySelector('.panel');
+        if(t&&panel)setTimeout(function(){panel.scrollTo({top:Math.max(0,t.closest('.block')?.offsetTop||0),behavior:'smooth'});},30);
+      });
+    });
+  }
+  if(document.readyState==='loading')document.addEventListener('DOMContentLoaded',init);else init();
+})();
+</script>
+
+<script id="duskreel-mobile-download-menu-js">
+(function(){
+  function mobile(){return window.innerWidth<=760;}
+  function findLogout(){
+    var buttons=document.querySelectorAll('header button');
+    for(var i=0;i<buttons.length;i++){
+      var t=(buttons[i].textContent||'').trim().toLowerCase();
+      if(t==='logout'||t.indexOf('logout')===0)return buttons[i];
+    }
+    return null;
+  }
+  function callAction(selector){
+    var b=document.querySelector(selector);
+    if(b){b.click();return true;}
+    return false;
+  }
+  function install(){
+    if(!mobile())return;
+    var logout=findLogout();
+    if(!logout)return;
+    if(document.querySelector('header .dusk-download-wrap'))return;
+
+    var wrap=document.createElement('div');
+    wrap.className='dusk-download-wrap';
+    wrap.innerHTML='<button type="button" class="dusk-download-trigger" aria-haspopup="menu" aria-expanded="false">Download <span class="dusk-download-chevron">▾</span></button>'+
+      '<div class="dusk-download-popover" role="menu">'+
+      '<button type="button" data-download-action="preview">Preview <strong>VIEW</strong></button>'+
+      '<button type="button" data-download-action="download">Download <strong>SAVE</strong></button>'+
+      '</div>';
+
+    logout.parentNode.insertBefore(wrap,logout);
+    var trigger=wrap.querySelector('.dusk-download-trigger');
+    var pop=wrap.querySelector('.dusk-download-popover');
+    trigger.addEventListener('click',function(e){
+      e.preventDefault();e.stopPropagation();
+      var open=pop.classList.toggle('open');
+      trigger.setAttribute('aria-expanded',open?'true':'false');
+    });
+    pop.addEventListener('click',function(e){
+      var b=e.target.closest('button');
+      if(!b)return;
+      e.preventDefault();e.stopPropagation();
+      pop.classList.remove('open');
+      trigger.setAttribute('aria-expanded','false');
+      if(b.dataset.downloadAction==='preview')callAction('#duskMobileActions .dusk-preview-btn');
+      if(b.dataset.downloadAction==='download')callAction('#duskMobileActions .dusk-download-btn');
+    });
+    document.addEventListener('click',function(e){
+      if(!wrap.contains(e.target)){
+        pop.classList.remove('open');
+        trigger.setAttribute('aria-expanded','false');
+      }
+    });
+  }
+  function init(){install();setTimeout(install,500);setTimeout(install,1500);}
+  if(document.readyState==='loading')document.addEventListener('DOMContentLoaded',init);else init();
+})();
+</script>
+
 </body>
 </html>
 
