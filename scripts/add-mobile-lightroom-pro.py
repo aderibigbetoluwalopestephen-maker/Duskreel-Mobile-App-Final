@@ -114,6 +114,5 @@ block=r"""<!-- DUSKREEL MOBILE LIGHTROOM PRO V1 -->
 if start in s:
     s=re.sub(re.escape(start)+r".*?"+re.escape(end),block,s,flags=re.S)
 else:
-    s=s.replace("</body>",block+"
-</body>")
+    s=s.replace("</body>",block+"\n</body>")
 p.write_text(s,encoding="utf-8")
